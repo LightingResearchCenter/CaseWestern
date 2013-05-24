@@ -3,7 +3,7 @@ close all
 %hold off
 clc
 fclose('all');
-
+addpath('IO');
 savefile = '\\ROOT\projects\Daysimeter and dimesimeter reference files\Dimesimeters\Case Western Subjects\Actigraph Routine.xls';
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
