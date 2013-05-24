@@ -1,6 +1,6 @@
 clear all
 close all
-hold off
+%hold off
 clc
 fclose('all');
 
@@ -9,18 +9,29 @@ fclose('all');
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
 [num txt raw] = xlsread('P:\malhor\AIM3\AIM3 lookup actigraph file included.xlsx');
 
-sub = num(:,1);
-intervention = num(:,2);
-aim = num(:,3);
-start = datenum(char(txt(2:end,5)));
-numdays = num(:,13);
-stop = start + numdays;
-file = char(txt(2:end,7));
+
+sub = num(:,1);                         %Subject number
+intervention = num(:,2);                %Intervention stage
+aim = num(:,3);                         %AIM number
+start = datenum(char(txt(2:end,5)));    %Start date
+numdays = num(:,13);                    %Number of days ecperiment lasted (7)
+stop = start + numdays;                 %End date (start + 7 days)
+file = char(txt(2:end,7));              %Path to the subject's dimesimeter data file
 dime = num(:,6);
 sub_check = num(9,:);
 intervention_check = num(:,10);
 aim_check = num(:,11);
 path2 = char(txt(2:end,15)); % Path to actiwatch data file
+
+%Look for files that need cropping and store the date
+crop_start = zeros( 1, length(txt));
+crop_end = zeros( 1, length(txt));
+for i = 2:length(txt)
+	if (~strcmpi( '', txt(i, 16) ))
+		crop_start(1, i) = datenum(char(txt(i,16)));
+		crop_end(1, i) = datenum(char(txt(i,17)));
+	end
+end
 
 
 %Matches actiwatch and dimesimeter data: variables with 'd' prefix come
@@ -38,9 +49,9 @@ for s = 1:6
     if(aim(s) == 3 && path2(s,1) == '\')
         %Checks if there is a listed actiwatch file for the subject and if
         %there is not it moves to the next subject
-    %     if (isempty(path2(s)) == 1)
-    %         break
-    %     end
+         if (isempty(path2(s)) == 1)
+             break
+         end
 
         [PIM, ZCM, TAT, time, sleep] = read_actiwatch_data(path2(s,:), start(s), stop(s));
         activity = PIM;
@@ -65,7 +76,7 @@ for s = 1:6
             continue
         end    
 
-        [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y);
+        [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
         activity = (mean(dactivity)/mean(activity))*activity;
         t = time(1):(60/85400):time(end);
@@ -74,7 +85,8 @@ for s = 1:6
         CS = interp1(dtime, CS, t, 'linear', 0.0);
         lux = interp1(dtime, lux, t, 'linear', 0.0);
 
-        PhasorReport( time, CS, activity, 'title');
+		title = [' Subject: ' num2str(sub(s)) ' Intervention: ' num2str(intervention(s))];
+        PhasorReport( time, CS, activity, title);
    
     end
 end
