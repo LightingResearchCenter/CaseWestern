@@ -1,4 +1,4 @@
-function PhasorReport(time,CS,activity,Title)
+function PhasorReport(time, CS, activity, Title, savePath)
 %PHASORREPORT Generates graphical summary of CS and Activity
 
 %% Process and analyze data
@@ -119,4 +119,8 @@ notes{9} = ['Mag 1st harmonic: ' num2str(abs(f24),'%.3f')];
 text3 = annotation(figure1,'textbox', [x3 y3 w3 h3], 'String',notes);
 set(text3,'EdgeColor','none','HorizontalAlignment','left',...
     'VerticalAlignment','middle','FontSize',14);
+
+%[savePath, Title, '.fig']
+saveas( gcf, [savePath, '\', Title, '.fig'] );
+close;
 end

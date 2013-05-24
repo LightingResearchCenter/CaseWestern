@@ -4,10 +4,13 @@ close all
 clc
 fclose('all');
 
-%savefile = '\\ROOT\projects\Daysimeter and dimesimeter reference files\Dimesimeters\Case Western Subjects\Actigraph Routine_PIM_16Jul2012.xls';
+savefile = '\\ROOT\projects\Daysimeter and dimesimeter reference files\Dimesimeters\Case Western Subjects\Actigraph Routine.xls';
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
-[num txt raw] = xlsread('P:\malhor\AIM3\AIM3 lookup actigraph file included.xlsx');
+[fileName, pathName] = uigetfile( 'P:\malhor\AIM3\*.xlsx', 'Select Subject Information Spreadsheet');
+[num txt raw] = xlsread( [pathName, fileName]);
+
+savePath = uigetdir( 'C:\Users\pentla\Documents\Results' );
 
 
 sub = num(:,1);                         %Subject number
@@ -44,7 +47,7 @@ end
 row = 0;
 lastsub = 0;
 
-for s = 1:6
+for s = 11:length(txt)
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
         %Checks if there is a listed actiwatch file for the subject and if
@@ -69,7 +72,7 @@ for s = 1:6
 
         %sets time from dimesimeter and actiwatch equal in order to avoid
         %discrepancies on the order of 1^-3 seconds
-           if (max(abs(dtime-time)) < 1e-3)
+        if (max(abs(dtime-time)) < 1e-3)
             time = dtime;
         else
             disp(['Error: the difference in times between dimesimeter and actiwatch is more than 00.001 seconds', '\nSubject: ', num2str(sub(s)), '\nIntervention: ', num2str(int(s))])
@@ -78,6 +81,7 @@ for s = 1:6
 
         [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
+		%Error cause here
         activity = (mean(dactivity)/mean(activity))*activity;
         t = time(1):(60/85400):time(end);
     %     dactivity = interp1(dtime, dactivity, t, 'linear', 0.0);
@@ -85,8 +89,8 @@ for s = 1:6
         CS = interp1(dtime, CS, t, 'linear', 0.0);
         lux = interp1(dtime, lux, t, 'linear', 0.0);
 
-		title = [' Subject: ' num2str(sub(s)) ' Intervention: ' num2str(intervention(s))];
-        PhasorReport( time, CS, activity, title);
+		title = ['Subject_' num2str(sub(s)) '_Intervention_' num2str(intervention(s))];
+        PhasorReport( time, CS, activity, title, savePath);
    
     end
 end

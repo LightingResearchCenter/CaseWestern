@@ -5,9 +5,9 @@ endtime = datenum(endtime);
 
 if (crop_start ~= 0)
 	z = find((time >= starttime) & (time <= endtime) & ((time <= crop_start) | (time >= crop_end)));
-else
-	z = find((time >= starttime) & (time <= endtime));
-end
+%else
+%	z = find((time >= starttime) & (time <= endtime));
+
 
 time = time(z);
 lux = lux(z);
@@ -16,6 +16,6 @@ activity = activity(z);
 temp = temp(z);
 x = x(z);
 y = y(z);
-
+end
 
 
