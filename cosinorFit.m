@@ -45,7 +45,7 @@ end
 
 D(1) = sum(Value);
 for i = 2:2*n + 1
-    D(i) = sum(yj(:,(i - 1)).*(Value'));
+    D(i) = sum(yj(:,(i - 1)).*(Value));
 end
 
 D = D';

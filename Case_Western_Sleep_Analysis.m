@@ -1,16 +1,22 @@
-clear all
+clear
 close all
 %hold off
 clc
 fclose('all');
 addpath('IO');
-savefile = '\\ROOT\projects\Daysimeter and dimesimeter reference files\Dimesimeters\Case Western Subjects\Actigraph Routine.xls';
+savefile = fullfile('\\ROOT','projects',...
+    'Daysimeter and dimesimeter reference files','Dimesimeters',...
+    'Case Western Subjects','Actigraph Routine.xls');
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
-[fileName, pathName] = uigetfile( '\\root\Public\malhor\AIM3\*.xlsx', 'Select Subject Information Spreadsheet');
-[num txt raw] = xlsread( [pathName, fileName]);
+startingFile = fullfile('\\ROOT','Public','malhor','AIM3',...
+                        'AIM3 lookup actigraph file included.xlsx');
+[fileName, pathName] = uigetfile(startingFile,...
+                        'Select Subject Information Spreadsheet');
+[num,txt,raw] = xlsread( [pathName, fileName]);
 
-savePath = uigetdir( 'C:\Users\pentla\Documents\Results' );
+username = getenv('USERNAME');
+savePath = uigetdir(fullfile('C:','Users',username,'Desktop','CaseWestern'));
 
 
 sub = num(:,1);                         %Subject number
