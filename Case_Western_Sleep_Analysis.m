@@ -7,7 +7,7 @@ addpath('IO');
 savefile = '\\ROOT\projects\Daysimeter and dimesimeter reference files\Dimesimeters\Case Western Subjects\Actigraph Routine.xls';
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
-[fileName, pathName] = uigetfile( 'P:\malhor\AIM3\*.xlsx', 'Select Subject Information Spreadsheet');
+[fileName, pathName] = uigetfile( '\\root\Public\malhor\AIM3\*.xlsx', 'Select Subject Information Spreadsheet');
 [num txt raw] = xlsread( [pathName, fileName]);
 
 savePath = uigetdir( 'C:\Users\pentla\Documents\Results' );
@@ -47,7 +47,7 @@ end
 row = 0;
 lastsub = 0;
 
-for s = 11:length(txt)
+for s = 1:length(txt)
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
         %Checks if there is a listed actiwatch file for the subject and if
@@ -83,11 +83,11 @@ for s = 11:length(txt)
 
 		%Error cause here
         activity = (mean(dactivity)/mean(activity))*activity;
-        t = time(1):(60/85400):time(end);
-    %     dactivity = interp1(dtime, dactivity, t, 'linear', 0.0);
-        activity = interp1(time, activity, t, 'linear', 0.0); 
-        CS = interp1(dtime, CS, t, 'linear', 0.0);
-        lux = interp1(dtime, lux, t, 'linear', 0.0);
+%         t = time(1):(60/85400):time(end);
+% %       dactivity = interp1(dtime, dactivity, t, 'linear', 0.0);
+%         activity = interp1(time, activity, t, 'linear', 0.0); 
+%         CS = interp1(dtime, CS, t, 'linear', 0.0);
+%         lux = interp1(dtime, lux, t, 'linear', 0.0);
 
 		title = ['Subject_' num2str(sub(s)) '_Intervention_' num2str(intervention(s))];
         PhasorReport( time, CS, activity, title, savePath);
