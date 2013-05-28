@@ -20,7 +20,7 @@ temp = fft(XCORR)/n;
 if  rem(n,2)==0 % is n even?
 %     MAGc(1:n/2+1) = [mag(1);2*mag(2:n/2);mag(n/2+1)]; % [dc; 2*(fundamental to nyquist-1); nyquist]
 %     PHASEc = 180/pi*phase(1:n/2+1); % degrees
-    Complex = [temp(1), zeros(1, n/2 - 2);2*temp(2:n/2);temp(n/2+1), zeros(1, n/2 - 2)];
+    Complex = [temp(1);2*temp(2:n/2);temp(n/2+1)]; %zeros(n/2 - 2, 1)
 else % else n is odd
 %     MAGc(1:(n+1)/2) = [mag(1);2*mag(2:(n+1)/2)]; % [dc; 2*(fundamental to nyquist)]
 %     PHASEc = 180/pi*phase(1:(n+1)/2); % degrees

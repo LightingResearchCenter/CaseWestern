@@ -1,6 +1,11 @@
-function [PIM, ZCM, TAT, time, sleep] = read_actiwatch_data(path, start, stop)
-
-    data = importdata(path); %Imports data as a struct from actiwatch data files
+function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
+	
+	try
+		data = importdata(path); %Imports data as a struct from actiwatch data files
+	catch
+		error( 'Invalid Actiwatch Data path');
+	end
+		
     %Following are three methods used to determine sleep times: PIM (Proportional Integral Mode), TAT (Time Above Threshold), ZCM (Zero
     %Cross Mode)
     PIM = data.data(:,1);
@@ -8,8 +13,8 @@ function [PIM, ZCM, TAT, time, sleep] = read_actiwatch_data(path, start, stop)
     TAT = data.data(:,3);
     light = data.data(:,4);
     events = data.data(:,5);
-    sleep = data.data(2:end,6);
-    
+    %sleep = data.data(:,6);
+	
     date = data.textdata(2:end,1);
     hour = data.textdata(2:end,2);
     
@@ -21,6 +26,6 @@ function [PIM, ZCM, TAT, time, sleep] = read_actiwatch_data(path, start, stop)
     PIM = PIM(q);
     TAT = TAT(q);
     ZCM = ZCM(q);
-    sleep = sleep(q);
+    %sleep = sleep(q);
     
 end
