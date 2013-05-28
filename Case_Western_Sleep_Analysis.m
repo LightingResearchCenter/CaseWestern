@@ -66,6 +66,8 @@ for s = 1:length(sub)
     if(aim(s) == 3 && path2(s,1) == '\')
 		
 		title = ['Subject_' num2str(sub(s)) '_Intervention_' num2str(intervention(s))];
+		subjectSavePath = fullfile( savePath, num2str(sub(s)) );
+		mkdir( subjectSavePath );
 		
         %Checks if there is a listed actiwatch file for the subject and if
         %there is not it moves to the next subject
@@ -115,9 +117,9 @@ for s = 1:length(sub)
 %         CS = interp1(dtime, CS, t, 'linear', 0.0);
 %         lux = interp1(dtime, lux, t, 'linear', 0.0);
 
-        existingPhasorFile = fullfile( savePath, [title, '.fig'] );
+        existingPhasorFile = fullfile( subjectSavePath, [title, '.fig'] );
 		if (~exist( existingPhasorFile, 'file' ))
-			PhasorReport( time, CS, activity, title, savePath );
+			PhasorReport( time, CS, activity, title, subjectSavePath );
 		end;
    
     end
