@@ -65,7 +65,7 @@ for s = 1:length(sub)
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
 		
-		title = ['Subject_' num2str(sub(s)) '_Intervention_' num2str(intervention(s))];
+		title = ['Subject ' num2str(sub(s)) ' Intervention ' num2str(intervention(s))];
 		subjectSavePath = fullfile( savePath, num2str(sub(s)) );
 		mkdir( subjectSavePath );
 		
