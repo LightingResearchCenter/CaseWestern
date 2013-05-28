@@ -121,6 +121,6 @@ set(text3,'EdgeColor','none','HorizontalAlignment','left',...
     'VerticalAlignment','middle','FontSize',14);
 
 %[savePath, Title, '.fig']
-saveas( gcf, [savePath, '\', Title, '.fig'] );
+saveas( gcf, [savePath, '\', Title, '.pdf'] );
 clf(1);
 end
