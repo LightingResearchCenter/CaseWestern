@@ -4,9 +4,9 @@ close all
 clc
 fclose('all');
 addpath('IO');
-savefile = fullfile('\\ROOT','projects',...
-    'Daysimeter and dimesimeter reference files','Dimesimeters',...
-    'Case Western Subjects','Actigraph Routine.xls');
+% savefile = fullfile('\\ROOT','projects',...
+%     'Daysimeter and dimesimeter reference files','Dimesimeters',...
+%     'Case Western Subjects','Actigraph Routine.xls');
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
 startingFile = fullfile('\\ROOT','Public','malhor','AIM3',...
@@ -18,13 +18,21 @@ startingFile = fullfile('\\ROOT','Public','malhor','AIM3',...
 username = getenv('USERNAME');
 savePath = uigetdir(fullfile('C:','Users',username,'Desktop','CaseWestern'));
 
+%Creates a text file that records any errors in the data in the same path
+%as the results
+fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
+fprintf( fid, 'Error Report \n' );
+fclose( fid );
+
 
 sub = num(:,1);                         %Subject number
 intervention = num(:,2);                %Intervention stage
 aim = num(:,3);                         %AIM number
 start = datenum(char(txt(2:end,5)));    %Start date
 numdays = num(:,13);                    %Number of days ecperiment lasted (7)
-stop = start + numdays;                 %End date (start + 7 days)
+emptyNumDays = find( isnan(numdays) );	%Find all the entries with an empty numDays value
+numdays( emptyNumDays ) = 7;			%Set the default value for the numDays to 7
+stop = start + numdays;                 %End date
 file = char(txt(2:end,7));              %Path to the subject's dimesimeter data file
 dime = num(:,6);
 sub_check = num(9,:);
@@ -35,10 +43,10 @@ path2 = char(txt(2:end,15)); % Path to actiwatch data file
 %Look for files that need cropping and store the date
 crop_start = zeros( 1, length(txt));
 crop_end = zeros( 1, length(txt));
-for i = 2:length(txt)
-	if (~strcmpi( '', txt(i, 16) ))
-		crop_start(1, i) = datenum(char(txt(i,16)));
-		crop_end(1, i) = datenum(char(txt(i,17)));
+for iCrop = 2:length(txt)
+	if (~strcmpi( '', txt(iCrop, 16) ))
+		crop_start(1, iCrop) = datenum(char(txt(iCrop,16)));
+		crop_end(1, iCrop) = datenum(char(txt(iCrop,17)));
 	end
 end
 
@@ -53,26 +61,37 @@ end
 row = 0;
 lastsub = 0;
 
-for s = 1:length(txt)
+for s = 1:length(sub)
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
+		
+		title = ['Subject_' num2str(sub(s)) '_Intervention_' num2str(intervention(s))];
+		
         %Checks if there is a listed actiwatch file for the subject and if
         %there is not it moves to the next subject
-         if (isempty(path2(s)) == 1)
-             break
-         end
+        if (isempty(path2(s)) == 1)
+			reportError( title, 'No actiwatch data available', savePath );
+			continue;
+		end
 
-        [PIM, ZCM, TAT, time, sleep] = read_actiwatch_data(path2(s,:), start(s), stop(s));
-        activity = PIM;
+ 		try
+			[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
+		catch err
+			reportError( title, err.message, savePath );
+			if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
+				continue;
+			end
+		end
+		
+		activity = PIM;
 
 
         [dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, numdays);
         srate = 1/(dtime(3) - dtime(2));
 
         %%Continues if there is an error in the dates of the actiwatch
-        error = [];
         if length(time) ~= length(dtime)
-            error = [error ; sub(s) intervention(s)];
+			reportError( title, 'Error in actiwatch dates', savePath );
             continue
         end
 
@@ -80,7 +99,8 @@ for s = 1:length(txt)
         %discrepancies on the order of 1^-3 seconds
         if (max(abs(dtime-time)) < 1e-3)
             time = dtime;
-        else
+		else
+			reportError( title, 'Difference in times between dimesimeter and actiwatch is more than 00.001 seconds', savePath );
             disp(['Error: the difference in times between dimesimeter and actiwatch is more than 00.001 seconds', '\nSubject: ', num2str(sub(s)), '\nIntervention: ', num2str(int(s))])
             continue
         end    
@@ -88,15 +108,17 @@ for s = 1:length(txt)
         [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
 		%Error cause here
-        activity = (mean(dactivity)/mean(activity))*activity;
+        activity = ( mean(dactivity)/mean(activity) )*activity;
 %         t = time(1):(60/85400):time(end);
 % %       dactivity = interp1(dtime, dactivity, t, 'linear', 0.0);
 %         activity = interp1(time, activity, t, 'linear', 0.0); 
 %         CS = interp1(dtime, CS, t, 'linear', 0.0);
 %         lux = interp1(dtime, lux, t, 'linear', 0.0);
 
-		title = ['Subject_' num2str(sub(s)) '_Intervention_' num2str(intervention(s))];
-        PhasorReport( time, CS, activity, title, savePath);
+        existingPhasorFile = fullfile( savePath, [title, '.fig'] );
+		if (~exist( existingPhasorFile, 'file' ))
+			PhasorReport( time, CS, activity, title, savePath );
+		end;
    
     end
 end
