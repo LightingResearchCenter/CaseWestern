@@ -24,7 +24,7 @@ activity = gaussian(activity, 4);
 MagH = sqrt(sum((abs(f24H).^2))); % the magnitude including all the harmonics
 
 %% Create figure
-figure1 = figure;
+figure1 = figure(1);
 paperPosition = [0 0 11 8.5];
 set(figure1,'PaperUnits','inches',...
     'PaperType','usletter',...
@@ -122,5 +122,5 @@ set(text3,'EdgeColor','none','HorizontalAlignment','left',...
 
 %[savePath, Title, '.fig']
 saveas( gcf, [savePath, '\', Title, '.fig'] );
-close;
+clf(1);
 end
