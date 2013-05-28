@@ -123,4 +123,5 @@ for s = 1:length(sub)
 		end;
    
     end
+    close all
 end
