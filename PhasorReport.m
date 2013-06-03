@@ -24,6 +24,8 @@ activity = gaussian(activity, 4);
 MagH = sqrt(sum((abs(f24H).^2))); % the magnitude including all the harmonics
 
 %% Set spacing values
+figure1 = gcf;
+paperPosition = get(figure1,'paperPosition');
 xMargin = 0.5/paperPosition(3);
 xSpace = 0.125/paperPosition(3);
 yMargin = 0.5/paperPosition(4);
