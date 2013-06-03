@@ -110,10 +110,9 @@ end
 [time, red, green, blue, activity] = textread(filename, '%f %f %f %f %f', 'headerlines', i);
 
 %catch order issues from wrong file type
-for i = 1:length(time)
-    if(time < 1000000)
-        error('The wrong file type was selected, or the file is not formatted correctly');
-    end
+timeErr = time<1000000;
+if(max(timeErr) == 1)
+    error('The wrong file type was selected, or the file is not formatted correctly');
 end
 
 fclose(f);
