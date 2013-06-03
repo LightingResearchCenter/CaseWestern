@@ -1,19 +1,14 @@
-clear
+function Case_Western_Sleep_Analysis
 close all
-%hold off
-clc
 fclose('all');
 addpath('IO');
-% savefile = fullfile('\\ROOT','projects',...
-%     'Daysimeter and dimesimeter reference files','Dimesimeters',...
-%     'Case Western Subjects','Actigraph Routine.xls');
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
 startingFile = fullfile('\\ROOT','Public','malhor','AIM3',...
                         'AIM3 lookup actigraph file included.xlsx');
 [fileName, pathName] = uigetfile(startingFile,...
                         'Select Subject Information Spreadsheet');
-[num,txt,raw] = xlsread( [pathName, fileName]);
+[num,txt,~] = xlsread( [pathName, fileName]);
 
 username = getenv('USERNAME');
 savePath = uigetdir(fullfile('C:','Users',username,'Desktop','CaseWestern'));
@@ -30,8 +25,8 @@ intervention = num(:,2);                %Intervention stage
 aim = num(:,3);                         %AIM number
 start = datenum(char(txt(2:end,5)));    %Start date
 numdays = num(:,13);                    %Number of days ecperiment lasted (7)
-emptyNumDays = find( isnan(numdays) );	%Find all the entries with an empty numDays value
-numdays( emptyNumDays ) = 7;			%Set the default value for the numDays to 7
+emptyNumDays =  isnan(numdays) ;        %Find all the entries with an empty numDays value
+numdays(emptyNumDays) = 7;  			%Set the default value for the numDays to 7
 stop = start + numdays;                 %End date
 file = char(txt(2:end,7));              %Path to the subject's dimesimeter data file
 dime = num(:,6);
@@ -57,10 +52,6 @@ end
 %time, file = datafile path, numdays = # of days to be analyzed after the
 %start date
 
-
-row = 0;
-lastsub = 0;
-
 for s = 1:length(sub)
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
@@ -73,8 +64,8 @@ for s = 1:length(sub)
         %there is not it moves to the next subject
         if (isempty(path2(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
-			continue;
-		end
+            continue;
+        end
 
  		try
 			[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
@@ -109,14 +100,7 @@ for s = 1:length(sub)
 
         [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
-		%Error cause here
         activity = ( mean(dactivity)/mean(activity) )*activity;
-%         t = time(1):(60/85400):time(end);
-% %       dactivity = interp1(dtime, dactivity, t, 'linear', 0.0);
-%         activity = interp1(time, activity, t, 'linear', 0.0); 
-%         CS = interp1(dtime, CS, t, 'linear', 0.0);
-%         lux = interp1(dtime, lux, t, 'linear', 0.0);
-
         existingPhasorFile = fullfile( subjectSavePath, [title, '.fig'] );
 		if (~exist( existingPhasorFile, 'file' ))
 			PhasorReport( time, CS, activity, title, subjectSavePath );
