@@ -52,6 +52,17 @@ end
 %time, file = datafile path, numdays = # of days to be analyzed after the
 %start date
 
+%% Create figure
+figure1 = figure(1);
+paperPosition = [0 0 11 8.5];
+set(figure1,'PaperUnits','inches',...
+    'PaperType','usletter',...
+    'PaperOrientation','landscape',...
+    'PaperPositionMode','manual',...
+    'PaperPosition',paperPosition,...
+    'Units','inches',...
+    'Position',paperPosition);
+%%
 for s = 1:length(sub)
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
@@ -101,9 +112,12 @@ for s = 1:length(sub)
         [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
         activity = ( mean(dactivity)/mean(activity) )*activity;
-        existingPhasorFile = fullfile( subjectSavePath, [title, '.fig'] );
-		if (~exist( existingPhasorFile, 'file' ))
-			PhasorReport( time, CS, activity, title, subjectSavePath );
+        PhasorFile = fullfile( subjectSavePath, [title, '.pdf'] );
+
+		if (~exist( PhasorFile, 'file' ))
+			PhasorReport( time, CS, activity, title );
+            print( gcf, PhasorFile );
+            clf(1);
 		end;
    
     end

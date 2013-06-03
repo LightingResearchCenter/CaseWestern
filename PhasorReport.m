@@ -1,4 +1,4 @@
-function PhasorReport(time, CS, activity, Title, savePath)
+function PhasorReport(time, CS, activity, Title)
 %PHASORREPORT Generates graphical summary of CS and Activity
 
 %% Process and analyze data
@@ -22,17 +22,6 @@ activity = gaussian(activity, 4);
 [phasorMagnitude, phasorAngle] = cos24(CS, activity, time);
 [f24H,f24] = phasor24Harmonics(CS,activity,Srate); % f24H returns all the harmonics of the 24-hour rhythm (as complex numbers)
 MagH = sqrt(sum((abs(f24H).^2))); % the magnitude including all the harmonics
-
-%% Create figure
-figure1 = figure(1);
-paperPosition = [0 0 11 8.5];
-set(figure1,'PaperUnits','inches',...
-    'PaperType','usletter',...
-    'PaperOrientation','landscape',...
-    'PaperPositionMode','manual',...
-    'PaperPosition',paperPosition,...
-    'Units','inches',...
-    'Position',paperPosition);
 
 %% Set spacing values
 xMargin = 0.5/paperPosition(3);
@@ -119,8 +108,4 @@ notes{9} = ['Mag 1st harmonic: ' num2str(abs(f24),'%.3f')];
 text3 = annotation(figure1,'textbox', [x3 y3 w3 h3], 'String',notes);
 set(text3,'EdgeColor','none','HorizontalAlignment','left',...
     'VerticalAlignment','middle','FontSize',14);
-
-%[savePath, Title, '.fig']
-saveas( gcf, [savePath, '\', Title, '.pdf'] );
-clf(1);
 end
