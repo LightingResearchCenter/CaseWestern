@@ -120,11 +120,11 @@ for s = 1:length(sub)
         activity = ( mean(dactivity)/mean(activity) )*activity;
         PhasorFile = fullfile( subjectSavePath, [title, '.pdf'] );
 
-		if (~exist( PhasorFile, 'file' ))
+% 		if (~exist( PhasorFile, 'file' ))
 			PhasorReport( time, CS, activity, title );
-            print( gcf, PhasorFile );
+            print( gcf, '-dpdf', PhasorFile );
             clf(1);
-		end;
+% 		end;
    
     end
 end
