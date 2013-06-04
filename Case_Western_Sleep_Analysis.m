@@ -76,23 +76,29 @@ for s = 1:length(sub)
         if (isempty(path2(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
-        end
-
- 		try
-			[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
-		catch err
-			reportError( title, err.message, savePath );
-			if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
-				continue;
-			end
 		end
 		
-		activity = PIM;
+		matFilePath = fullfile(subjectSavePath, 'dime_watch_data.mat');
+		if (~exist(matFilePath, 'file'))
+			try
+				[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
+			catch err
+				reportError( title, err.message, savePath );
+				if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
+					continue;
+				end
+			end
+			activity = PIM;
 
-
-        [dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, numdays);
-        srate = 1/(dtime(3) - dtime(2));
-
+			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, numdays);
+			
+			
+			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
+			%srate = 1/(dtime(3) - dtime(2));
+		else
+			load(matFilePath);
+		end
+		
         %%Continues if there is an error in the dates of the actiwatch
         if length(time) ~= length(dtime)
 			reportError( title, 'Error in actiwatch dates', savePath );
