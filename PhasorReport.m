@@ -1,4 +1,4 @@
-function PhasorReport(time, CS, activity, Title)
+function [phasorMagnitude,phasorAngle,IS,IV,mCS,MagH,f24abs] = PhasorReport(time, CS, activity, Title)
 %PHASORREPORT Generates graphical summary of CS and Activity
 
 %% Process and analyze data
@@ -104,10 +104,13 @@ notes{3} = ' ';
 notes{4} = ['IS: ', num2str(IS, '%.2f')];
 notes{5} = ['IV: ', num2str(IV, '%.2f')];
 notes{6} = ' ';
-notes{7} = ['Average CS: ', num2str(mean(CS), '%.2f')];
+mCS = mean(CS);
+notes{7} = ['Average CS: ', num2str(mCS, '%.2f')];
 notes{8} = ['Mag w/ harmonics: ' num2str(MagH,'%.3f')];
-notes{9} = ['Mag 1st harmonic: ' num2str(abs(f24),'%.3f')];
+f24abs = abs(f24);
+notes{9} = ['Mag 1st harmonic: ' num2str(f24abs,'%.3f')];
 text3 = annotation(figure1,'textbox', [x3 y3 w3 h3], 'String',notes);
 set(text3,'EdgeColor','none','HorizontalAlignment','left',...
     'VerticalAlignment','middle','FontSize',14);
+
 end

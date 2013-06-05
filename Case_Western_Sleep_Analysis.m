@@ -63,7 +63,15 @@ set(figure1,'PaperUnits','inches',...
     'Units','inches',...
     'Position',paperPosition);
 %%
-for s = 1:length(sub)
+lengthSub = length(sub);
+phasorMagnitude = zeros(lengthSub,1);
+phasorAngle = zeros(lengthSub,1);
+IS = zeros(lengthSub,1);
+IV = zeros(lengthSub,1);
+mCS = zeros(lengthSub,1);
+MagH = zeros(lengthSub,1);
+f24abs = zeros(lengthSub,1);
+for s = 1:lengthSub
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
 		
@@ -120,11 +128,14 @@ for s = 1:length(sub)
         activity = ( mean(dactivity)/mean(activity) )*activity;
         PhasorFile = fullfile( subjectSavePath, [title, '.pdf'] );
 
-        PhasorReport( time, CS, activity, title );
+        [phasorMagnitude(s),phasorAngle(s),IS(s),IV(s),mCS(s),MagH(s),f24abs(s)] = PhasorReport( time, CS, activity, title );
         print( gcf, '-dpdf', PhasorFile );
         clf(1);
    
     end
 end
 close all;
+save('output.mat','sub','intervention','phasorMagnitude','phasorAngle',...
+    'IS','IV','mCS','MagH','f24abs');
+xlswrite('output.xlsx',[sub,intervention,phasorMagnitude,phasorAngle,IS,IV,mCS,MagH,f24abs]);
 end
