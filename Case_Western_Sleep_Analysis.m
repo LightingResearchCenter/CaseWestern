@@ -76,12 +76,12 @@ for s = 1:length(sub)
         if (isempty(path2(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
-		end
+        end
 		
 		matFilePath = fullfile(subjectSavePath, 'dime_watch_data.mat');
 		if (~exist(matFilePath, 'file'))
 			try
-				[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
+				[PIM, ~, ~, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
 			catch err
 				reportError( title, err.message, savePath );
 				if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
@@ -120,11 +120,9 @@ for s = 1:length(sub)
         activity = ( mean(dactivity)/mean(activity) )*activity;
         PhasorFile = fullfile( subjectSavePath, [title, '.pdf'] );
 
-% 		if (~exist( PhasorFile, 'file' ))
-			PhasorReport( time, CS, activity, title );
-            print( gcf, '-dpdf', PhasorFile );
-            clf(1);
-% 		end;
+        PhasorReport( time, CS, activity, title );
+        print( gcf, '-dpdf', PhasorFile );
+        clf(1);
    
     end
 end
