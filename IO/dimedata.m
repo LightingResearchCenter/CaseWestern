@@ -1,12 +1,12 @@
-function [dtime, lux, CLA, CS, activity, temp, x, y] = dimedata(num, txt, s, numdays)
+function [dtime, lux, CLA, CS, activity, temp, x, y] = dimedata(num, txt, s, dstart, dstop)
 
 dsub = num(:,1);
 dint = num(:,2);
 daim = num(:,3);
 dime = num(:,6);
 
-dstart = datenum((txt(2:end,5)));
-dstop = datenum(dstart)+7;
+% dstart = datenum((txt(2:end,5)));
+% dstop = datenum(dstart)+7;
 dquality = char(txt(2:end,4));
 dfile = char(txt(2:end,8));
 

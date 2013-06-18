@@ -98,7 +98,7 @@ for s = 1:lengthSub
 			end
 			activity = PIM;
 
-			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, numdays);
+			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, start(s), stop(s));
 			
 			
 			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
