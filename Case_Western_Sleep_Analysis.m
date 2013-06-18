@@ -89,14 +89,13 @@ for s = 1:lengthSub
 		matFilePath = fullfile(subjectSavePath, 'dime_watch_data.mat');
 		if (~exist(matFilePath, 'file'))
 			try
-				[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
+				[activity, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
 			catch err
 				reportError( title, err.message, savePath );
 				if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
 					continue;
 				end
-			end
-			activity = PIM;
+            end
 
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, start(s), stop(s));
 			
@@ -107,7 +106,25 @@ for s = 1:lengthSub
 			load(matFilePath);
 		end
 		
-        %%Continues if there is an error in the dates of the actiwatch
+        % Crops data
+        if length(time) ~= length(dtime)
+            stop(s) = min(time(end),dtime(end));
+            q = time <= stop(s);
+            time = time(q);
+            activity = activity(q);
+            TAT = TAT(q);
+            ZCM = ZCM(q);
+            dq = dtime <= stop(s);
+            dtime = dtime(dq);
+            lux = lux(dq);
+            CLA = CLA(dq);
+            dactivity = dactivity(dq);
+            CS = CS(dq);
+            temp = temp(dq);
+            x = x(dq);
+            y = y(dq);
+        end
+        % Continues if there is an error in the dates of the actiwatch
         if length(time) ~= length(dtime)
 			reportError( title, 'Error in actiwatch dates', savePath );
             continue
