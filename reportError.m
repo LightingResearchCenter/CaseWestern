@@ -4,7 +4,7 @@ function [] = reportError( title, error, savePath )
 %	be output to a file in the results folder
 
 	fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'a' );
-	fprintf( fid, '\n %s: %s', title, error );
+	fprintf( fid, '\r\n %s: %s', title, error );
 	fclose( fid );
 
 end

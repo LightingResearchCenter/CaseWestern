@@ -16,7 +16,7 @@ savePath = uigetdir(fullfile('C:','Users',username,'Desktop','CaseWestern'));
 %Creates a text file that records any errors in the data in the same path
 %as the results
 fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
-fprintf( fid, 'Error Report \n' );
+fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
 
