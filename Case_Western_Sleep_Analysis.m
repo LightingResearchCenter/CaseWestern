@@ -89,7 +89,7 @@ for s = 1:lengthSub
 		matFilePath = fullfile(subjectSavePath, 'dime_watch_data.mat');
 		if (~exist(matFilePath, 'file'))
 			try
-				[PIM, ~, ~, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
+				[PIM, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
 			catch err
 				reportError( title, err.message, savePath );
 				if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
@@ -135,7 +135,12 @@ for s = 1:lengthSub
     end
 end
 close all;
-save('output.mat','sub','intervention','phasorMagnitude','phasorAngle',...
-    'IS','IV','mCS','MagH','f24abs');
-xlswrite('output.xlsx',[sub,intervention,phasorMagnitude,phasorAngle,IS,IV,mCS,MagH,f24abs]);
+%% Create Excel file
+excelFile = fullfile(savePath,'output.xlsx');
+xlswrite(excelFile,{'subject','intervention','phasor magnitude',...
+    'phasor angle','IS','IV','mean CS','magnitude with harmonics',...
+    'magnitude of 1st harmonic'},'A1:I1'); % Create Header row
+dataRange = ['A2:I',num2str(length(sub))];
+xlswrite(excelFile,[sub,intervention,phasorMagnitude,phasorAngle,IS,...
+    IV,mCS,MagH,f24abs],dataRange);
 end
