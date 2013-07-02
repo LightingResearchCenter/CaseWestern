@@ -63,14 +63,20 @@ set(figure1,'PaperUnits','inches',...
     'Units','inches',...
     'Position',paperPosition);
 %%
+
+% Preallocate output dataset
 lengthSub = length(sub);
-phasorMagnitude = zeros(lengthSub,1);
-phasorAngle = zeros(lengthSub,1);
-IS = zeros(lengthSub,1);
-IV = zeros(lengthSub,1);
-mCS = zeros(lengthSub,1);
-MagH = zeros(lengthSub,1);
-f24abs = zeros(lengthSub,1);
+outputData = dataset;
+outputData.subject = sub;
+outputData.week = intervention;
+outputData.phasorMagnitude = zeros(lengthSub,1);
+outputData.phasorAngle = zeros(lengthSub,1);
+outputData.IS = zeros(lengthSub,1);
+outputData.IV = zeros(lengthSub,1);
+outputData.meanCS = zeros(lengthSub,1);
+outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
+outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
+
 for s = 1:lengthSub
     disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
     if(aim(s) == 3 && path2(s,1) == '\')
@@ -145,7 +151,10 @@ for s = 1:lengthSub
         activity = ( mean(dactivity)/mean(activity) )*activity;
         PhasorFile = fullfile( subjectSavePath, [title, '.pdf'] );
 
-        [phasorMagnitude(s),phasorAngle(s),IS(s),IV(s),mCS(s),MagH(s),f24abs(s)] = PhasorReport( time, CS, activity, title );
+        [outputData.phasorMagnitude(s),outputData.phasorAngle(s),...
+            outputData.IS(s),outputData.IV(s),outputData.meanCS(s),...
+            outputData.magnitudeWithHarmonics(s),...
+            outputData.magnitudeFirstHarmonic(s)] = PhasorReport( time, CS, activity, title );
         print( gcf, '-dpdf', PhasorFile );
         clf(1);
    
@@ -154,10 +163,5 @@ end
 close all;
 %% Create Excel file
 excelFile = fullfile(savePath,'output.xlsx');
-xlswrite(excelFile,{'subject','intervention','phasor magnitude',...
-    'phasor angle','IS','IV','mean CS','magnitude with harmonics',...
-    'magnitude of 1st harmonic'},'A1:I1'); % Create Header row
-dataRange = ['A2:I',num2str(length(sub))];
-xlswrite(excelFile,[sub,intervention,phasorMagnitude,phasorAngle,IS,...
-    IV,mCS,MagH,f24abs],dataRange);
+organizeExcel( outputData, excelFile )
 end
