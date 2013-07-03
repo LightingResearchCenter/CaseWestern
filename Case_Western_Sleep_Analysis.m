@@ -92,9 +92,9 @@ for s = 1:lengthSub
             continue;
         end
 		
-		matFilePath = fullfile(subjectSavePath, 'dime_watch_data.mat');
+		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_',num2str(intervention(s)),'.mat']);
 		if (~exist(matFilePath, 'file'))
-			try
+            try
 				[activity, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
 			catch err
 				reportError( title, err.message, savePath );
@@ -114,7 +114,12 @@ for s = 1:lengthSub
 		
         % Crops data
         if length(time) ~= length(dtime)
-            stop(s) = min(time(end),dtime(end));
+            try
+                stop(s) = min(time(end),dtime(end));
+            catch err
+                reportError( title, err.message, savePath );
+                continue;
+            end
             q = time <= stop(s);
             time = time(q);
             activity = activity(q);
