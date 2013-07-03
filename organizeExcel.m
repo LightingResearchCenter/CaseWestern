@@ -1,6 +1,14 @@
-function organizeExcel( inputData, fileName )
+function organizeExcel
 %ORGANIZEEXCEL Organize input data and save to Excel
 %   Format for Mariana
+username = getenv('USERNAME');
+savePath = fullfile('C:','Users',username,'Desktop','CaseWestern');
+[inputName, inputPath] = uigetfile(fullfile(savePath,'*.mat'));
+inputFile = fullfile(inputPath,inputName);
+load(inputFile);
+saveFile = regexprep(inputFile,'\.mat','\.xlsx');
+inputData = outputData;
+clear outputData;
 
 %% Determine size of input and variable names
 [~,varCount] = size(inputData);
@@ -33,6 +41,9 @@ header2 = [{'subject'},varNames,varNames,varNames];
 header = [header1;header2];
 
 %% Organize data
+% Remove empty lines
+idx = inputData.phasorMagnitude == 0 & inputData.phasorAngle == 0 & inputData.IS == 0 & inputData.IV == 0 & inputData.meanCS == 0;
+inputData(idx,:) = [];
 % Seperate subject and week from rest of inputData
 inputData1 = dataset;
 inputData1.subject = inputData.subject;
@@ -60,47 +71,41 @@ for i1 = 1:nPatients
     outputData1{i1,1} = patient(i1);
     % Week 0
     idx0 = inputData1.subject == patient(i1) & inputData1.week == 0;
-    try
-    outputData1(i1,2:varCount+1) = inputData2Cell(idx0,:);
-    catch err
+    if max(idx0) == 1
+        outputData1(i1,2:varCount+1) = inputData2Cell(idx0,:);
     end
     % Week 1
     idx1 = inputData1.subject == patient(i1) & inputData1.week == 1;
-    try
-    outputData1(i1,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
-    catch err
+    if max(idx1) == 1
+        outputData1(i1,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
     end
     % Week 2
     idx2 = inputData1.subject == patient(i1) & inputData1.week == 2;
-    try
-    outputData1(i1,varCount*2+2:varCount*3+1) = inputData2Cell(idx2,:);
-    catch err
+    if max(idx2) == 1
+        outputData1(i1,varCount*2+2:varCount*3+1) = inputData2Cell(idx2,:);
     end
 end
 
 % Organize caregiver data by week
 nCaregivers = length(caregiver);
 outputData2 = cell(nCaregivers,varCount*3+1);
-for i1 = 1:nCaregivers
+for i2 = 1:nCaregivers
     % Subject number
-    outputData2{i1,1} = caregiver(i1);
+    outputData2{i2,1} = caregiver(i2);
     % Week 0
-    idx0 = inputData1.subject == caregiver(i1) & inputData1.week == 0;
-    try
-    outputData2(i1,2:varCount+1) = inputData2Cell(idx0,:);
-    catch err
+    idx0 = inputData1.subject == caregiver(i2) & inputData1.week == 0;
+    if max(idx0) == 1
+        outputData2(i2,2:varCount+1) = inputData2Cell(idx0,:);
     end
     % Week 1
-    idx1 = inputData1.subject == caregiver(i1) & inputData1.week == 1;
-    try
-    outputData2(i1,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
-    catch err
+    idx1 = inputData1.subject == caregiver(i2) & inputData1.week == 1;
+    if max(idx1) == 1
+        outputData2(i2,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
     end
     % Week 2
-    idx2 = inputData1.subject == caregiver(i1) & inputData1.week == 2;
-    try
-    outputData2(i1,varCount+2:varCount*2+1) = inputData2Cell(idx2,:);
-    catch err
+    idx2 = inputData1.subject == caregiver(i2) & inputData1.week == 2;
+    if max(idx2) == 1
+        outputData2(i2,varCount+2:varCount*2+1) = inputData2Cell(idx2,:);
     end
 end
 
@@ -113,8 +118,8 @@ output2 = [header;outputData2];
 sheet1 = 'patient';
 sheet2 = 'caregiver';
 % Write to file
-xlswrite(fileName,output1,sheet1); % Create sheet1
-xlswrite(fileName,output2,sheet2); % Create sheet2
+xlswrite(saveFile,output1,sheet1); % Create sheet1
+xlswrite(saveFile,output2,sheet2); % Create sheet2
 
 end
 

@@ -166,7 +166,7 @@ for s = 1:lengthSub
     end
 end
 close all;
-%% Create Excel file
-excelFile = fullfile(savePath,'output.xlsx');
-organizeExcel( outputData, excelFile )
+%% Save output
+outputFile = fullfile(savePath,'output.mat');
+save(outputFile,'outputData')
 end
