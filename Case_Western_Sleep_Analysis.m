@@ -52,16 +52,6 @@ end
 %time, file = datafile path, numdays = # of days to be analyzed after the
 %start date
 
-%% Create figure
-figure1 = figure(1);
-paperPosition = [0 0 11 8.5];
-set(figure1,'PaperUnits','inches',...
-    'PaperType','usletter',...
-    'PaperOrientation','landscape',...
-    'PaperPositionMode','manual',...
-    'PaperPosition',paperPosition,...
-    'Units','inches',...
-    'Position',paperPosition);
 %%
 
 % Preallocate output dataset
@@ -154,14 +144,11 @@ for s = 1:lengthSub
         [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
         activity = ( mean(dactivity)/mean(activity) )*activity;
-        PhasorFile = fullfile( subjectSavePath, [title, '.pdf'] );
 
         [outputData.phasorMagnitude(s),outputData.phasorAngle(s),...
             outputData.IS(s),outputData.IV(s),outputData.meanCS(s),...
             outputData.magnitudeWithHarmonics(s),...
-            outputData.magnitudeFirstHarmonic(s)] = PhasorReport( time, CS, activity, title );
-        print( gcf, '-dpdf', PhasorFile );
-        clf(1);
+            outputData.magnitudeFirstHarmonic(s)] = phasorAnalysis( time, CS, activity, title );
    
     end
 end
