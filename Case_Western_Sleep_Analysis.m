@@ -1,11 +1,9 @@
 function Case_Western_Sleep_Analysis
-close all
-fclose('all');
 addpath('IO');
 
 %reads in data from excel spreadsheet of dimesimeter/actiwatch info
-startingFile = fullfile('\\ROOT','Public','malhor','AIM3',...
-                        'AIM3 lookup actigraph file included.xlsx');
+startingFile = fullfile([filesep,filesep],'root','projects',...
+    'NIH Alzheimers','CaseWesternData','index.xlsx');
 [fileName, pathName] = uigetfile(startingFile,...
                         'Select Subject Information Spreadsheet');
 [num,txt,~] = xlsread( [pathName, fileName]);
@@ -152,7 +150,7 @@ for s = 1:lengthSub
    
     end
 end
-close all;
+
 %% Save output
 outputFile = fullfile(savePath,'output.mat');
 save(outputFile,'outputData')
