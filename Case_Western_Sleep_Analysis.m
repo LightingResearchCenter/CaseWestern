@@ -11,9 +11,8 @@ workbookFile = fullfile(workbookPath,workbookName);
     actiPath,rmStart,rmStop] = importIndex(workbookFile);
 
 %% Parse data from excel spreadsheet
-emptyNumDays =  isnan(days) ;        %Find all the entries with an empty numDays value
+emptyNumDays =  isnan(days) ;       %Find all the entries with an empty numDays value
 days(emptyNumDays) = 7;  			%Set the default value for the numDays to 7
-dimeStop = dimeStart + days;                 %End date
 
 %% Select an output location
 username = getenv('USERNAME');
@@ -25,17 +24,7 @@ fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
-%% Look for files that need cropping and store the date
-crop_start = zeros( 1, length(txt));
-crop_end = zeros( 1, length(txt));
-for iCrop = 2:length(txt)
-	if (~strcmpi( '', txt(iCrop, 16) ))
-		crop_start(1, iCrop) = datenum(char(txt(iCrop,16)));
-		crop_end(1, iCrop) = datenum(char(txt(iCrop,17)));
-	end
-end
-
-
+%%
 %Matches actiwatch and dimesimeter data: variables with 'd' prefix come
 %from dimesimeter and variables without the 'd' come from actiwatch data
 %sub = subject #, int = intervention #, dime = dimesimeter #, start = start
@@ -55,10 +44,13 @@ outputData.meanCS = zeros(lengthSub,1);
 outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 
-for s = 1:lengthSub
-    disp(['s = ', num2str(s),' Subject: ', num2str(subject(s)),' Intervention: ', num2str(week(s))])
-    if(aim(s) == 3 && actiPath(s,1) == '\')
+for s = 3:lengthSub
+    disp(['s = ', num2str(s), ' Subject: ', num2str(subject(s)), ...
+		  ' Intervention: ', num2str(week(s))])
+    if(~isempty(actiPath{s,1}))
 		
+		%Creates a title and savepath from the Subject name and
+		%intervention number
 		title = ['Subject ' num2str(subject(s)) ' Intervention ' num2str(week(s))];
 		subjectSavePath = fullfile( savePath, num2str(subject(s)) );
 		mkdir( subjectSavePath );
@@ -68,51 +60,53 @@ for s = 1:lengthSub
         if (isempty(actiPath(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
-        end
+		end
 		
-		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_',num2str(week(s)),'.mat']);
+		%Gets the file location of the .mat file. If it doesn't exist, then
+		%information about the subjects will be generated from the data
+		%files
+		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_', num2str(week(s)), '.mat']);
+		
+		startTime = max(dimeStart(s), actiStart(s));
+		stopTime = startTime + days(s);
 		if (~exist(matFilePath, 'file'))
+			%Reads the data from the actiwatch data file
+			[activity, ZCM, TAT, time] = deal(0);
             try
-				[activity, ZCM, TAT, time] = read_actiwatch_data(actiPath(s,:), dimeStart(s), dimeStop(s));
+				[activity, ZCM, TAT, time] = read_actiwatch_data(actiPath{s}, ...
+																 startTime, ...
+																 stopTime);
 			catch err
 				reportError( title, err.message, savePath );
-				if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
+				if (strcmp(err.message, 'Invalid Actiwatch Data path'))
 					continue;
 				end
-            end
+			end
 
-			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, dimeStart(s), dimeStop(s));
+			%Reads the data from the dimesimeter data file
+			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(dimePath{s, 1}, ...
+																	dimeSN(s), ...
+																	startTime, ...
+																	stopTime);
 			
 			
-			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
+			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', ...
+				 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
 			%srate = 1/(dtime(3) - dtime(2));
 		else
 			load(matFilePath);
 		end
 		
         % Crops data
-        if length(time) ~= length(dtime)
-            try
-                dimeStop(s) = min(time(end),dtime(end));
-            catch err
-                reportError( title, err.message, savePath );
-                continue;
-            end
-            q = time <= dimeStop(s);
-            time = time(q);
-            activity = activity(q);
-            TAT = TAT(q);
-            ZCM = ZCM(q);
-            dq = dtime <= dimeStop(s);
-            dtime = dtime(dq);
-            lux = lux(dq);
-            CLA = CLA(dq);
-            dactivity = dactivity(dq);
-            CS = CS(dq);
-            temp = temp(dq);
-            x = x(dq);
-            y = y(dq);
-        end
+		stopTime = min(time(end), dtime(end));
+		if length(time) > length(dtime)
+			[time, activity, ZCM, TAT] = trimData(time, startTime, stopTime, ...
+										 rmStart(s), rmStop(s), time, activity, ZCM, TAT);
+		else
+			[dtime, lux, CLA, CS, dactivity, temp, x, y] = trimData(dtime, startTime, stopTime, ...
+														   rmStart(s), rmStop(s), dtime, lux, CLA, CS, ...
+													       dactivity, temp, x, y);
+		end
         % Continues if there is an error in the dates of the actiwatch
         if length(time) ~= length(dtime)
 			reportError( title, 'Error in actiwatch dates', savePath );
@@ -129,15 +123,17 @@ for s = 1:lengthSub
             continue
         end    
 
-        [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(dimeStart(s), datestr(dimeStart(s) + days(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
+        [time, lux, CLA, CS, activity, ZCM, TAT, dactivity, temp, x, y] = ...
+			trimData(time, startTime, stopTime, rmStart(s), rmStop(s), lux, ...
+			CLA, CS, activity, ZCM, TAT, dactivity, temp, x, y);
 
         activity = ( mean(dactivity)/mean(activity) )*activity;
 
-        [outputData.phasorMagnitude(s),outputData.phasorAngle(s),...
-            outputData.IS(s),outputData.IV(s),outputData.meanCS(s),...
-            outputData.magnitudeWithHarmonics(s),...
-            outputData.magnitudeFirstHarmonic(s)] = phasorAnalysis( time, CS, activity, title );
-   
+        [outputData.phasorMagnitude(s), outputData.phasorAngle(s),...
+            outputData.IS(s), outputData.IV(s), outputData.meanCS(s),...
+            outputData.magnitudeWithHarmonics(s), ...
+            outputData.magnitudeFirstHarmonic(s)] = phasorAnalysis(time, CS, activity);
+	break;
     end
 end
 
