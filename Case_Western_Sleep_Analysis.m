@@ -1,39 +1,31 @@
 function Case_Western_Sleep_Analysis
 addpath('IO');
 
-%reads in data from excel spreadsheet of dimesimeter/actiwatch info
+%% Read in data from excel spreadsheet of dimesimeter/actiwatch info
 startingFile = fullfile([filesep,filesep],'root','projects',...
     'NIH Alzheimers','CaseWesternData','index.xlsx');
-[fileName, pathName] = uigetfile(startingFile,...
-                        'Select Subject Information Spreadsheet');
-[num,txt,~] = xlsread( [pathName, fileName]);
+[workbookName, workbookPath] = uigetfile(startingFile,...
+    'Select Subject Information Spreadsheet');
+workbookFile = fullfile(workbookPath,workbookName);
+[subject,week,days,dimeStart,dimeSN,dimePath,actiStart,actiSN,...
+    actiPath,rmStart,rmStop] = importIndex(workbookFile);
 
+%% Parse data from excel spreadsheet
+emptyNumDays =  isnan(days) ;        %Find all the entries with an empty numDays value
+days(emptyNumDays) = 7;  			%Set the default value for the numDays to 7
+dimeStop = dimeStart + days;                 %End date
+
+%% Select an output location
 username = getenv('USERNAME');
 savePath = uigetdir(fullfile('C:','Users',username,'Desktop','CaseWestern'));
 
-%Creates a text file that records any errors in the data in the same path
+%% Creates a text file that records any errors in the data in the same path
 %as the results
 fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
-
-sub = num(:,1);                         %Subject number
-intervention = num(:,2);                %Intervention stage
-aim = num(:,3);                         %AIM number
-start = datenum(char(txt(2:end,5)));    %Start date
-numdays = num(:,13);                    %Number of days ecperiment lasted (7)
-emptyNumDays =  isnan(numdays) ;        %Find all the entries with an empty numDays value
-numdays(emptyNumDays) = 7;  			%Set the default value for the numDays to 7
-stop = start + numdays;                 %End date
-file = char(txt(2:end,7));              %Path to the subject's dimesimeter data file
-dime = num(:,6);
-sub_check = num(9,:);
-intervention_check = num(:,10);
-aim_check = num(:,11);
-path2 = char(txt(2:end,15)); % Path to actiwatch data file
-
-%Look for files that need cropping and store the date
+%% Look for files that need cropping and store the date
 crop_start = zeros( 1, length(txt));
 crop_end = zeros( 1, length(txt));
 for iCrop = 2:length(txt)
@@ -50,13 +42,11 @@ end
 %time, file = datafile path, numdays = # of days to be analyzed after the
 %start date
 
-%%
-
 % Preallocate output dataset
-lengthSub = length(sub);
+lengthSub = length(subject);
 outputData = dataset;
-outputData.subject = sub;
-outputData.week = intervention;
+outputData.subject = subject;
+outputData.week = week;
 outputData.phasorMagnitude = zeros(lengthSub,1);
 outputData.phasorAngle = zeros(lengthSub,1);
 outputData.IS = zeros(lengthSub,1);
@@ -66,24 +56,24 @@ outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 
 for s = 1:lengthSub
-    disp(['s = ', num2str(s),' Subject: ', num2str(sub(s)),' Intervention: ', num2str(intervention(s))])
-    if(aim(s) == 3 && path2(s,1) == '\')
+    disp(['s = ', num2str(s),' Subject: ', num2str(subject(s)),' Intervention: ', num2str(week(s))])
+    if(aim(s) == 3 && actiPath(s,1) == '\')
 		
-		title = ['Subject ' num2str(sub(s)) ' Intervention ' num2str(intervention(s))];
-		subjectSavePath = fullfile( savePath, num2str(sub(s)) );
+		title = ['Subject ' num2str(subject(s)) ' Intervention ' num2str(week(s))];
+		subjectSavePath = fullfile( savePath, num2str(subject(s)) );
 		mkdir( subjectSavePath );
 		
         %Checks if there is a listed actiwatch file for the subject and if
         %there is not it moves to the next subject
-        if (isempty(path2(s)) == 1)
+        if (isempty(actiPath(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
         end
 		
-		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_',num2str(intervention(s)),'.mat']);
+		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_',num2str(week(s)),'.mat']);
 		if (~exist(matFilePath, 'file'))
             try
-				[activity, ZCM, TAT, time] = read_actiwatch_data(path2(s,:), start(s), stop(s));
+				[activity, ZCM, TAT, time] = read_actiwatch_data(actiPath(s,:), dimeStart(s), dimeStop(s));
 			catch err
 				reportError( title, err.message, savePath );
 				if (strcmp( err.message, 'Invalid Actiwatch Data path' ))
@@ -91,7 +81,7 @@ for s = 1:lengthSub
 				end
             end
 
-			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, start(s), stop(s));
+			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(num, txt, s, dimeStart(s), dimeStop(s));
 			
 			
 			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
@@ -103,17 +93,17 @@ for s = 1:lengthSub
         % Crops data
         if length(time) ~= length(dtime)
             try
-                stop(s) = min(time(end),dtime(end));
+                dimeStop(s) = min(time(end),dtime(end));
             catch err
                 reportError( title, err.message, savePath );
                 continue;
             end
-            q = time <= stop(s);
+            q = time <= dimeStop(s);
             time = time(q);
             activity = activity(q);
             TAT = TAT(q);
             ZCM = ZCM(q);
-            dq = dtime <= stop(s);
+            dq = dtime <= dimeStop(s);
             dtime = dtime(dq);
             lux = lux(dq);
             CLA = CLA(dq);
@@ -135,11 +125,11 @@ for s = 1:lengthSub
             time = dtime;
 		else
 			reportError( title, 'Difference in times between dimesimeter and actiwatch is more than 00.001 seconds', savePath );
-            disp(['Error: the difference in times between dimesimeter and actiwatch is more than 00.001 seconds', '\nSubject: ', num2str(sub(s)), '\nIntervention: ', num2str(int(s))])
+            disp(['Error: the difference in times between dimesimeter and actiwatch is more than 00.001 seconds', '\nSubject: ', num2str(subject(s)), '\nIntervention: ', num2str(int(s))])
             continue
         end    
 
-        [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(start(s), datestr(start(s) + numdays(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
+        [dtime, lux, CLA, dactivity, temp,x , y] = selectDays(dimeStart(s), datestr(dimeStart(s) + days(s)), dtime, lux, CLA, dactivity, temp, x, y, crop_start, crop_end);
 
         activity = ( mean(dactivity)/mean(activity) )*activity;
 
