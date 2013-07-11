@@ -5,17 +5,17 @@ function [cal, chrom, time, red, green, blue, activity] = read_raw_dime_08Jun201
 f = fopen(filename);
 
 %load in cal files
-g = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\RGB Calibration Values.txt');
+g = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\RGB Calibration Values.txt');
 if(id > 21)
-    h = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\Other Calibration Values_Ithaca.txt');
+    h = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\Other Calibration Values_Ithaca.txt');
 elseif(id > 13)
-    h = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\Other Calibration Values_14 to 21.txt');
+    h = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\Other Calibration Values_14 to 21.txt');
 elseif(id > 7)
-    h = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\Other Calibration Values_8 to 13.txt');
+    h = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\Other Calibration Values_8 to 13.txt');
 elseif(id > 1)
-    h = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\Other Calibration Values_2 to 7.txt');
+    h = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\Other Calibration Values_2 to 7.txt');
 elseif(id == 1)
-    h = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\Other Calibration Values_8 to 13.txt');
+    h = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\Other Calibration Values_8 to 13.txt');
 else
     error('Cal values cannot be found for given ID');
 end

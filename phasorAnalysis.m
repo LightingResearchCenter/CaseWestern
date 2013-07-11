@@ -1,4 +1,4 @@
-function [phasorMagnitude,phasorAngle,IS,IV,mCS,MagH,f24abs] = phasorAnalysis(time, CS, activity)
+function [phasorMagnitude, phasorAngle, IS, IV, mCS, MagH, f24abs] = phasorAnalysis(time, CS, activity)
 %PHASORANALYSIS Performs analysis on CS and activity
 
 %% Process and analyze data

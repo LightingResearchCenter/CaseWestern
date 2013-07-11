@@ -10,13 +10,13 @@ function [Sm, Vm, M, Vp, V, C] = dimeconstants_09Aug2011(id)
 
 %pull in appropriate table of constants
 if(id > 21)
-    f = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\All Cal Values_Ithaca.txt');
+    f = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\All Cal Values_Ithaca.txt');
 elseif((id > 21) || (id == 1))
-    f = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\All Cal Values_14to21.txt');
+    f = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\All Cal Values_14to21.txt');
 elseif(id > 8)
-    f = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\All Cal Values_9to13.txt');
+    f = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\All Cal Values_9to13.txt');
 else
-    f = fopen('\\ROOT\projects\Daysimeter and dimesimeter reference files\data\All Cal Values_2to8.txt');
+    f = fopen('\\ROOT\projects\DaysimeterAndDimesimeterReferenceFiles\data\All Cal Values_2to8.txt');
 end
 
 %throw away header
