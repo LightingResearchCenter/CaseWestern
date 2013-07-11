@@ -44,7 +44,7 @@ outputData.meanCS = zeros(lengthSub,1);
 outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 
-for s = 3:lengthSub
+for s = 1:lengthSub
     disp(['s = ', num2str(s), ' Subject: ', num2str(subject(s)), ...
 		  ' Intervention: ', num2str(week(s))])
     if(~isempty(actiPath{s,1}))
@@ -133,7 +133,6 @@ for s = 3:lengthSub
             outputData.IS(s), outputData.IV(s), outputData.meanCS(s),...
             outputData.magnitudeWithHarmonics(s), ...
             outputData.magnitudeFirstHarmonic(s)] = phasorAnalysis(time, CS, activity);
-	break;
     end
 end
 
