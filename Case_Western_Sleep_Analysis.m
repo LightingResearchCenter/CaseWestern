@@ -53,7 +53,9 @@ for s = 61:lengthSub
 		%intervention number
 		title = ['Subject ' num2str(subject(s)) ' Intervention ' num2str(week(s))];
 		subjectSavePath = fullfile( savePath, num2str(subject(s)) );
-		mkdir( subjectSavePath );
+		if ~exist(subjectSavePath, 'dir')
+			mkdir(subjectSavePath);
+		end
 		
         %Checks if there is a listed actiwatch file for the subject and if
         %there is not it moves to the next subject
