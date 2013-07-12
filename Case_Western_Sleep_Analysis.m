@@ -89,8 +89,8 @@ for s = 61:lengthSub
 																	stopTime);
 			
 			
-%			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', ...
-% 				 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
+			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', ...
+ 				 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
 		else
 			load(matFilePath);
 		end
