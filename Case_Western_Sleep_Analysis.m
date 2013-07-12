@@ -44,7 +44,7 @@ outputData.meanCS = zeros(lengthSub,1);
 outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 
-for s = 1:lengthSub
+for s = 61:lengthSub
     disp(['s = ', num2str(s), ' Subject: ', num2str(subject(s)), ...
 		  ' Intervention: ', num2str(week(s))])
     if(~isempty(actiPath{s,1}))
@@ -67,7 +67,7 @@ for s = 1:lengthSub
 		%files
 		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_', num2str(week(s)), '.mat']);
 		
-		startTime = max(dimeStart(s), actiStart(s));
+		startTime = max(actiStart(s), dimeStart(s));
 		stopTime = startTime + days(s);
 		if (~exist(matFilePath, 'file'))
 			%Reads the data from the actiwatch data file
@@ -78,11 +78,8 @@ for s = 1:lengthSub
 																 stopTime);
 			catch err
 				reportError( title, err.message, savePath );
-				if (strcmp(err.message, 'Invalid Actiwatch Data path'))
-					continue;
-				end
+				continue;
 			end
-
 			%Reads the data from the dimesimeter data file
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(dimePath{s, 1}, ...
 																	dimeSN(s), ...
@@ -90,14 +87,14 @@ for s = 1:lengthSub
 																	stopTime);
 			
 			
-			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', ...
-				 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
-			%srate = 1/(dtime(3) - dtime(2));
+%			save(matFilePath, 'activity', 'ZCM', 'TAT', 'time', 'dtime', 'lux', ...
+% 				 'CLA', 'CS', 'dactivity', 'temp', 'x', 'y');
 		else
 			load(matFilePath);
 		end
 		
         % Crops data
+		startTime = max(time(1), dtime(1));
 		stopTime = min(time(end), dtime(end));
 		if length(time) > length(dtime)
 			[time, activity, ZCM, TAT] = trimData(time, startTime, stopTime, ...
@@ -109,7 +106,7 @@ for s = 1:lengthSub
 		end
         % Continues if there is an error in the dates of the actiwatch
         if length(time) ~= length(dtime)
-			reportError( title, 'Error in actiwatch dates', savePath );
+			reportError( title, 'Mismatch in number of actiwatch values', savePath );
             continue
         end
 
@@ -128,11 +125,15 @@ for s = 1:lengthSub
 			CLA, CS, activity, ZCM, TAT, dactivity, temp, x, y);
 
         activity = ( mean(dactivity)/mean(activity) )*activity;
-
-        [outputData.phasorMagnitude(s), outputData.phasorAngle(s),...
-            outputData.IS(s), outputData.IV(s), outputData.meanCS(s),...
-            outputData.magnitudeWithHarmonics(s), ...
-            outputData.magnitudeFirstHarmonic(s)] = phasorAnalysis(time, CS, activity);
+		try
+			[outputData.phasorMagnitude(s), outputData.phasorAngle(s),...
+				outputData.IS(s), outputData.IV(s), outputData.meanCS(s),...
+				outputData.magnitudeWithHarmonics(s), ...
+				outputData.magnitudeFirstHarmonic(s)] = phasorAnalysis(time, CS, activity);
+		catch err
+				reportError( title, err.message, savePath );
+				continue;
+		end
     end
 end
 

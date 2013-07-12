@@ -3,7 +3,7 @@ function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
 	try
 		dataArray = importfile(path); %Imports data as a struct from actiwatch data files
 	catch
-		error( 'Invalid Actiwatch Data path');
+		error('Invalid Actiwatch Data path');
 	end
 		
     %Following are three methods used to determine sleep times: PIM (Proportional Integral Mode), TAT (Time Above Threshold), ZCM (Zero
@@ -19,7 +19,10 @@ function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
     hour = dataArray{:, 2};
     
     time = datenum(date1, 'mm/dd/yyyy') + datenum(hour, 'HH:MM:SS') - datenum('00:00');
-   
+	if abs(time(1) - start) > 7
+		error('Actiwatch start times mismatch')
+	end
+	
     %Eliminates data outside of start and end times
     q = find((time >= start) & (time <= stop));
     time = time(q);
