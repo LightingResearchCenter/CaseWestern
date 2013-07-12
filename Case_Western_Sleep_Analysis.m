@@ -44,7 +44,7 @@ outputData.meanCS = zeros(lengthSub,1);
 outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 
-for s = 61:lengthSub
+for s = 1:lengthSub
     disp(['s = ', num2str(s), ' Subject: ', num2str(subject(s)), ...
 		  ' Intervention: ', num2str(week(s))])
     if(~isempty(actiPath{s,1}))
@@ -100,8 +100,8 @@ for s = 61:lengthSub
 		stopTime = min(time(end), dtime(end));
 		if length(time) > length(dtime)
 			[time, activity, ZCM, TAT] = trimData(time, startTime, stopTime, ...
-										 rmStart(s), rmStop(s), time, activity, ZCM, TAT);
-		else
+										 rmStart(s), rmStop(s), activity, ZCM, TAT);
+		else if length(time) < length(dtime)
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] = trimData(dtime, startTime, stopTime, ...
 														   rmStart(s), rmStop(s), dtime, lux, CLA, CS, ...
 													       dactivity, temp, x, y);
