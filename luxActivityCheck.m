@@ -44,6 +44,7 @@ index1 = 1:length(logical1);
 %numdays = # of days to be analyzed after the start date
 
 fig = figure; % Create the figure window
+set(fig, 'Position', get(0,'Screensize')); % Maximize figure
 for s = index1(logical1)
     disp([' Subject: ',num2str(subject(s)),' Week: ', num2str(week(s))])
     if(~isempty(actiPath{s,1}))
@@ -71,10 +72,15 @@ for s = index1(logical1)
             continue;
         end
         %Reads the data from the dimesimeter data file
-        [dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(dimePath{s, 1}, ...
+        try
+            [dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(dimePath{s, 1}, ...
                                                                 dimeSN(s), ...
                                                                 startTime, ...
                                                                 stopTime);
+        catch err
+            reportError( errTitle, err.message, saveDir );
+            continue;
+        end
         % Crops data
 		startTime = max(time(1), dtime(1));
 		stopTime = min(time(end), dtime(end));
@@ -83,7 +89,7 @@ for s = index1(logical1)
 										 rmStart(s), rmStop(s), activity, ZCM, TAT);
         elseif length(time) < length(dtime)
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] = trimData(dtime, startTime, stopTime, ...
-														   rmStart(s), rmStop(s), dtime, lux, CLA, CS, ...
+														   rmStart(s), rmStop(s), lux, CLA, CS, ...
 													       dactivity, temp, x, y);
 		end
         % Continues if there is an error in the dates of the actiwatch
@@ -110,7 +116,7 @@ for s = index1(logical1)
 		try
 			%Plot
             [~, name, ~] = fileparts(dimePath{s});
-            savePath = fullfile(saveDir, [name,'.fig']);
+            savePath = fullfile(saveDir, [name,'.jpg']);
             figTitle = {['Subject: ', num2str(subject(s)), ' Week: ', num2str(week(s)), ' Dime SN: ', num2str(dimeSN(s))]; dimePath{s}; [datestr(startTime), ' - ', datestr(stopTime)]};
             plotLuxActivity(time, lux, activity, fig, figTitle, savePath);
 		catch err

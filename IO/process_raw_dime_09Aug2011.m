@@ -81,8 +81,8 @@ end
 %display number of resets, and when they occured
 disp(['Number of resets = ',num2str(resets)]);
 if(resets > 0)
-    disp(['reset times = ',...
-        datestr((time(reset)/(3600*24)+6.954217798611112e+005) - (1/24) + (17/1440))]);
+    disp('reset times: ');
+    disp(datestr((time(reset)/(3600*24)+6.954217798611112e+005) - (1/24) + (17/1440)));
 end
 
 %set all temp values to zero since temp isn't saved by the dimesimeter
