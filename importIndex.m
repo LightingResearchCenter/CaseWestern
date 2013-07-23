@@ -37,7 +37,9 @@ end
 % If row start and end points are not specified, define defaults
 if nargin <= 3
     startRow = 2;
-    endRow = 207;
+    temp = xlsread(workbookFile);
+    endRow = length(temp)+1;
+    clear temp;
 end
 
 %% Import the data, extracting spreadsheet dates in MATLAB serial date number format (datenum)
