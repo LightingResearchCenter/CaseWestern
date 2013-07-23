@@ -71,17 +71,17 @@ for i1 = 1:nPatients
     outputData1{i1,1} = patient(i1);
     % Week 0
     idx0 = inputData1.subject == patient(i1) & inputData1.week == 0;
-    if max(idx0) == 1
+    if sum(idx0) == 1
         outputData1(i1,2:varCount+1) = inputData2Cell(idx0,:);
     end
     % Week 1
     idx1 = inputData1.subject == patient(i1) & inputData1.week == 1;
-    if max(idx1) == 1
+    if sum(idx1) == 1
         outputData1(i1,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
     end
     % Week 2
     idx2 = inputData1.subject == patient(i1) & inputData1.week == 2;
-    if max(idx2) == 1
+    if sum(idx2) == 1
         outputData1(i1,varCount*2+2:varCount*3+1) = inputData2Cell(idx2,:);
     end
 end
@@ -94,18 +94,18 @@ for i2 = 1:nCaregivers
     outputData2{i2,1} = caregiver(i2);
     % Week 0
     idx0 = inputData1.subject == caregiver(i2) & inputData1.week == 0;
-    if max(idx0) == 1
+    if sum(idx0) == 1
         outputData2(i2,2:varCount+1) = inputData2Cell(idx0,:);
     end
     % Week 1
     idx1 = inputData1.subject == caregiver(i2) & inputData1.week == 1;
-    if max(idx1) == 1
+    if sum(idx1) == 1
         outputData2(i2,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
     end
     % Week 2
     idx2 = inputData1.subject == caregiver(i2) & inputData1.week == 2;
-    if max(idx2) == 1
-        outputData2(i2,varCount+2:varCount*2+1) = inputData2Cell(idx2,:);
+    if sum(idx2) == 1
+        outputData2(i2,varCount*2+2:varCount*3+1) = inputData2Cell(idx2,:);
     end
 end
 

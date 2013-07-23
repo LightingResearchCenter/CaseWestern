@@ -62,7 +62,7 @@ for s = 1:lengthSub
         if (isempty(actiPath(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
-		end
+        end
 		
 		%Gets the file location of the .mat file. If it doesn't exist, then
 		%information about the subjects will be generated from the data
@@ -78,10 +78,10 @@ for s = 1:lengthSub
 				[activity, ZCM, TAT, time] = read_actiwatch_data(actiPath{s}, ...
 																 startTime, ...
 																 stopTime);
-			catch err
+            catch err
 				reportError( title, err.message, savePath );
 				continue;
-			end
+            end
 			%Reads the data from the dimesimeter data file
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] = dimedata(dimePath{s, 1}, ...
 																	dimeSN(s), ...
@@ -101,7 +101,7 @@ for s = 1:lengthSub
 		if length(time) > length(dtime)
 			[time, activity, ZCM, TAT] = trimData(time, startTime, stopTime, ...
 										 rmStart(s), rmStop(s), activity, ZCM, TAT);
-		else if length(time) < length(dtime)
+        elseif length(time) < length(dtime)
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] = trimData(dtime, startTime, stopTime, ...
 														   rmStart(s), rmStop(s), dtime, lux, CLA, CS, ...
 													       dactivity, temp, x, y);

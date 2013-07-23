@@ -79,9 +79,10 @@ end
 % activity(find((red < max(red)) & (red > 10000))) = activity(find((red < max(red)) & (red > 10000)) - 1);
 
 %display number of resets, and when they occured
-number_of_resets = resets
+disp(['Number of resets = ',num2str(resets)]);
 if(resets > 0)
-    reset_times = datestr((time(reset)/(3600*24)+6.954217798611112e+005) - (1/24) + (17/1440))
+    disp(['reset times = ',...
+        datestr((time(reset)/(3600*24)+6.954217798611112e+005) - (1/24) + (17/1440))]);
 end
 
 %set all temp values to zero since temp isn't saved by the dimesimeter
