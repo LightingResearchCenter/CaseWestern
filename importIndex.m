@@ -78,3 +78,7 @@ actiPath = cellVectors(:,2);
 rmStart = data(:,8);
 rmStop = data(:,9);
 
+%% Complete file paths replace ...\
+[pathstr, ~, ~] = fileparts(workbookFile);
+dimePath = fullfile(pathstr,regexprep(dimePath,'\.\.\.\\',''));
+actiPath = fullfile(pathstr,regexprep(actiPath,'\.\.\.\\',''));

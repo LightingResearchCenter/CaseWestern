@@ -1,8 +1,8 @@
 function organizeExcel
 %ORGANIZEEXCEL Organize input data and save to Excel
 %   Format for Mariana
-username = getenv('USERNAME');
-savePath = fullfile('C:','Users',username,'Desktop','CaseWestern');
+savePath = fullfile([filesep,filesep],'root','projects',...
+    'NIH Alzheimers','CaseWesternData','Analysis');
 [inputName, inputPath] = uigetfile(fullfile(savePath,'*.mat'));
 inputFile = fullfile(inputPath,inputName);
 load(inputFile);

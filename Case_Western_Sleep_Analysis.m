@@ -15,8 +15,7 @@ emptyNumDays =  isnan(days) ;       %Find all the entries with an empty numDays 
 days(emptyNumDays) = 7;  			%Set the default value for the numDays to 7
 
 %% Select an output location
-username = getenv('USERNAME');
-savePath = uigetdir(fullfile('C:','Users',username,'Desktop','CaseWestern'));
+savePath = uigetdir(fullfile(workbookPath,'Analysis'));
 
 %% Creates a text file that records any errors in the data in the same path
 %as the results
