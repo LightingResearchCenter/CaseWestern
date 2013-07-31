@@ -12,10 +12,10 @@ clear outputData;
 
 %% Determine size of input and variable names
 [~,varCount] = size(inputData);
-varCount = varCount - 2; % Do not count subject number or week
+varCount = varCount - 3; % Do not count subject number, week, or season
 varNames = get(inputData,'VarNames');
-% Remove subject and week from varNames
-varNameIdx = strcmpi(varNames,'subject') | strcmpi(varNames,'week');
+% Remove subject, week, and season from varNames
+varNameIdx = strcmpi(varNames,'subject') | strcmpi(varNames,'week') | strcmpi(varNames,'season');
 varNames(varNameIdx) = [];
 
 %% Create header labels
@@ -32,10 +32,10 @@ week2Txt = 'post intervention (2)';
 week2Mat = repmat(week2Txt,varCount,1);
 week2Head =  mat2cell(week2Mat,ones(1,varCount),length(week2Txt))';
 
-header1 = [{[]},week0Head,week1Head,week2Head]; % Combine parts of header1
+header1 = [{[]},{[]},week0Head,week1Head,week2Head]; % Combine parts of header1
 
 % Prepare second header row
-header2 = [{'subject'},varNames,varNames,varNames];
+header2 = [{'subject'},{'season'},varNames,varNames,varNames];
 
 % Combine headers
 header = [header1;header2];
@@ -44,15 +44,17 @@ header = [header1;header2];
 % Remove empty lines
 idx = inputData.phasorMagnitude == 0 & inputData.phasorAngle == 0 & inputData.IS == 0 & inputData.IV == 0 & inputData.meanCS == 0;
 inputData(idx,:) = [];
-% Seperate subject and week from rest of inputData
+% Seperate subject, week, and season from rest of inputData
 inputData1 = dataset;
 inputData1.subject = inputData.subject;
 inputData1.week = inputData.week;
+inputData1.season = inputData.season;
 
-% Copy inputData and remove subject and week
+% Copy inputData and remove subject, week, and season
 inputData2 = inputData;
 inputData2.subject = [];
 inputData2.week = [];
+inputData2.season = [];
 
 % Convert inputData2 to cells
 inputData2Cell = dataset2cell(inputData2);
@@ -72,17 +74,18 @@ for i1 = 1:nPatients
     % Week 0
     idx0 = inputData1.subject == patient(i1) & inputData1.week == 0;
     if sum(idx0) == 1
-        outputData1(i1,2:varCount+1) = inputData2Cell(idx0,:);
+        outputData1{i1,2} = inputData1.season{idx0}; %assign season
+        outputData1(i1,3:varCount+2) = inputData2Cell(idx0,:);
     end
     % Week 1
     idx1 = inputData1.subject == patient(i1) & inputData1.week == 1;
     if sum(idx1) == 1
-        outputData1(i1,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
+        outputData1(i1,varCount+3:varCount*2+2) = inputData2Cell(idx1,:);
     end
     % Week 2
     idx2 = inputData1.subject == patient(i1) & inputData1.week == 2;
     if sum(idx2) == 1
-        outputData1(i1,varCount*2+2:varCount*3+1) = inputData2Cell(idx2,:);
+        outputData1(i1,varCount*2+3:varCount*3+2) = inputData2Cell(idx2,:);
     end
 end
 
@@ -95,17 +98,18 @@ for i2 = 1:nCaregivers
     % Week 0
     idx0 = inputData1.subject == caregiver(i2) & inputData1.week == 0;
     if sum(idx0) == 1
-        outputData2(i2,2:varCount+1) = inputData2Cell(idx0,:);
+        outputData2{i2,2} = inputData1.season{idx0}; %assign season
+        outputData2(i2,3:varCount+2) = inputData2Cell(idx0,:);
     end
     % Week 1
     idx1 = inputData1.subject == caregiver(i2) & inputData1.week == 1;
     if sum(idx1) == 1
-        outputData2(i2,varCount+2:varCount*2+1) = inputData2Cell(idx1,:);
+        outputData2(i2,varCount+3:varCount*2+2) = inputData2Cell(idx1,:);
     end
     % Week 2
     idx2 = inputData1.subject == caregiver(i2) & inputData1.week == 2;
     if sum(idx2) == 1
-        outputData2(i2,varCount*2+2:varCount*3+1) = inputData2Cell(idx2,:);
+        outputData2(i2,varCount*2+3:varCount*3+2) = inputData2Cell(idx2,:);
     end
 end
 

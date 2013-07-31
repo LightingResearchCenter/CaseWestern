@@ -44,10 +44,12 @@ outputData.IV = zeros(lengthSub,1);
 outputData.meanCS = zeros(lengthSub,1);
 outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
+outputData.season = cell(lengthSub,1);
 
 for s = 1:lengthSub
     disp(['s = ',num2str(s),' Subject: ',num2str(subject(s)),...
-		  ' Intervention: ',num2str(week(s))])
+        ' Intervention: ',num2str(week(s))]);
+    
     if(~isempty(actiPath{s,1}))
 		
 		%Creates a title and savepath from the Subject name and
@@ -98,7 +100,7 @@ for s = 1:lengthSub
         % Crops data
 		startTime = max(time(1), dtime(1));
 		stopTime = min(time(end), dtime(end));
-		if length(time) > length(dtime)
+        if length(time) > length(dtime)
 			[time,activity,ZCM,TAT] =...
                 trimData(time,startTime,stopTime,rmStart(s),rmStop(s),...
                 activity,ZCM,TAT);
@@ -106,7 +108,18 @@ for s = 1:lengthSub
 			[dtime,lux,CLA,CS,dactivity,temp,x,y] =...
                 trimData(dtime,startTime,stopTime,rmStart(s),rmStop(s),...
                 lux,CLA,CS,dactivity, temp, x, y);
-		end
+        end
+        
+        %Determine the season
+        if week(s) == 0
+            month = str2double(datestr(startTime,'mm'));
+            if month < 3 || month >= 11
+                outputData.season{s} = 'winter';
+            else
+                outputData.season{s} = 'summer';
+            end
+        end
+        
         % Continues if there is an error in the dates of the actiwatch
         if length(time) ~= length(dtime)
 			reportError(title,'Mismatch in number of actiwatch values',...
