@@ -1,4 +1,4 @@
-function Case_Western_Sleep_Analysis
+function CaseWesternAnalysis
 addpath('IO');
 
 %% Read in data from excel spreadsheet of dimesimeter/actiwatch info
