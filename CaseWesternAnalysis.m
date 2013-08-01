@@ -1,5 +1,5 @@
 function CaseWesternAnalysis
-addpath('IO');
+addpath('IO','phasorAnalysis');
 
 %% Read in data from excel spreadsheet of dimesimeter/actiwatch info
 startingFile = fullfile([filesep,filesep],'root','projects',...
