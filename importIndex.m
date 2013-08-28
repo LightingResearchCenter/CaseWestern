@@ -80,5 +80,5 @@ rmStop = data(:,9);
 
 %% Complete file paths replace ...\
 [pathstr, ~, ~] = fileparts(workbookFile);
-dimePath = fullfile(pathstr,regexprep(dimePath,'\.\.\.\\',''));
-actiPath = fullfile(pathstr,regexprep(actiPath,'\.\.\.\\',''));
+dimePath = fullfile(pathstr,dimePath);
+actiPath = fullfile(pathstr,actiPath);
