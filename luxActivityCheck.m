@@ -84,14 +84,16 @@ for s = index1(logical1)
         % Crops data
 		startTime = max(time(1), dtime(1));
 		stopTime = min(time(end), dtime(end));
-		if length(time) > length(dtime)
-			[time, activity, ZCM, TAT] = trimData(time, startTime, stopTime, ...
-										 rmStart(s), rmStop(s), activity, ZCM, TAT);
-        elseif length(time) < length(dtime)
-			[dtime, lux, CLA, CS, dactivity, temp, x, y] = trimData(dtime, startTime, stopTime, ...
-														   rmStart(s), rmStop(s), lux, CLA, CS, ...
-													       dactivity, temp, x, y);
-		end
+        if length(time) > length(dtime)
+			[time, activity, ZCM, TAT] = trimData(time, startTime,...
+                stopTime, rmStart(s), rmStop(s), activity, ZCM, TAT);
+        end
+        if length(time) < length(dtime)
+			[dtime, lux, CLA, CS, dactivity, temp, x, y] = ...
+                trimData(dtime, startTime, stopTime, ...
+				rmStart(s), rmStop(s), lux, CLA, CS, ...
+				dactivity, temp, x, y);
+        end
         % Continues if there is an error in the dates of the actiwatch
         if length(time) ~= length(dtime)
 			reportError( errTitle, 'Mismatch in number of actiwatch values', saveDir );
