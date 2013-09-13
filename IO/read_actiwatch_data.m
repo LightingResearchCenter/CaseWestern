@@ -19,8 +19,8 @@ function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
     hour = dataArray{:, 2};
     
     time = datenum(date1, 'mm/dd/yyyy') + datenum(hour, 'HH:MM:SS') - datenum('00:00');
-	if abs(time(1) - start) > 7
-		error('Actiwatch start times mismatch')
+	if start < time(1) || stop > time(end)
+		error('Actiwatch start/stop times mismatch')
 	end
 	
     %Eliminates data outside of start and end times
