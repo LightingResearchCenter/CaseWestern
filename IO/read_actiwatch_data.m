@@ -18,6 +18,16 @@ function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
     date1 = dataArray{:, 1};
     hour = dataArray{:, 2};
     
+    % remove empty values
+    idx = isnan(PIM);
+    PIM(idx) = [];
+    ZCM(idx) = [];
+    TAT(idx) = [];
+    light(idx) = [];
+    events(idx) = [];
+    date1(idx) = [];
+    hour(idx) = [];
+    
     time = datenum(date1, 'mm/dd/yyyy') + datenum(hour, 'HH:MM:SS') - datenum('00:00');
 	if start < time(1) || stop > time(end)
 		error('Actiwatch start/stop times mismatch')
