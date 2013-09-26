@@ -1,7 +1,13 @@
 function CaseWesternAnalysis
+%CASEWESTERNANALYSIS Desciption goes here
+%   Detailed description goes here
+
+%% Enable paths to rewuired subfunctions
 addpath('IO','phasorAnalysis');
 
-%% Read in data from excel spreadsheet of dimesimeter/actiwatch info
+%% File handling
+
+% Read in data from excel spreadsheet of dimesimeter/actiwatch info
 % Set starting path to look in
 startingFile = fullfile([filesep,filesep],'root','projects',...
     'NIH Alzheimers','CaseWesternData','index.xlsx');
@@ -22,18 +28,7 @@ fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
-%%
-% Matches actiwatch and dimesimeter data: variables with 'd' prefix come
-% from dimesimeter and variables without the 'd' come from actiwatch data
-% sub = subject #, int = intervention #, dime = dimesimeter #, start = start
-% time, file = datafile path, numdays = # of days to be analyzed after the
-% start date
-
-% Set start and stop times for analysis
-startTime = max([actiStart,dimeStart],[],2);
-stopTime = startTime + days;
-
-% Preallocate output dataset
+%% Preallocate output dataset
 lengthSub = length(subject);
 outputData = dataset;
 outputData.subject = subject;
@@ -47,6 +42,19 @@ outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
 outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 outputData.season = cell(lengthSub,1);
 
+%% Perform vectorized calculations
+
+% Set start and stop times for analysis
+startTime = max([actiStart,dimeStart],[],2);
+stopTime = startTime + days;
+
+% Determine the season
+month = str2double(datestr(startTime,'mm'));
+idxSeason = month < 3 | month >= 11;
+outputData.season{idxSeason} = 'winter';
+outputData.season{~idxSeason} = 'summer';
+
+%% Begin main loop
 for s = 1:lengthSub
     disp(['s = ',num2str(s),' Subject: ',num2str(subject(s)),...
         ' Intervention: ',num2str(week(s))]);
@@ -105,16 +113,6 @@ for s = 1:lengthSub
         
         % Normalize Actiwatch activity to Dimesimeter activity
         AIn = PIM*(mean(AI)/mean(PIM));
-        
-        %Determine the season
-        if week(s) == 0
-            month = str2double(datestr(startTime,'mm'));
-            if month < 3 || month >= 11
-                outputData.season{s} = 'winter';
-            else
-                outputData.season{s} = 'summer';
-            end
-        end
         
 		try
 			[outputData.phasorMagnitude(s),outputData.phasorAngle(s),...
