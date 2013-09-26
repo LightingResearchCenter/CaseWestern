@@ -70,7 +70,7 @@ for s = 1:lengthSub
         end
 		
         %Reads the data from the actiwatch data file
-        [pimTS] = deal(0);
+        pimTS = deal(0);
         try
             pimTS = importActiwatch(actiPath{s});
         catch err
@@ -78,8 +78,13 @@ for s = 1:lengthSub
             continue;
         end
         %Reads the data from the dimesimeter data file
-        [dtime, lux, CLA, CS, dactivity, temp, x, y] =...
-            dimedata(dimePath{s, 1},dimeSN(s));
+        [csTS, aiTS] = deal(0);
+        try
+            [csTS, aiTS] = importDime(dimePath{s, 1},dimeSN(s));
+        catch err
+            reportError( title, err.message, savePath );
+            continue;
+        end
 		
         % Crops data
         
