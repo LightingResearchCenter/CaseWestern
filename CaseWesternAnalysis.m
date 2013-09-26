@@ -20,7 +20,8 @@ workbookFile = fullfile(workbookPath,workbookName);
     actiPath,rmStart,rmStop] = importIndex(workbookFile);
 
 %% Select an output location
-savePath = uigetdir(fullfile(workbookPath,'Analysis'));
+savePath = uigetdir(fullfile(workbookPath,'Analysis'),...
+    'Select an output location');
 
 %% Creates a text file that records any errors in the data in the same path
 % as the results
@@ -45,19 +46,27 @@ outputData.season = cell(lengthSub,1);
 %% Perform vectorized calculations
 
 % Set start and stop times for analysis
+actiStart(isnan(actiStart)) = 0;
+dimeStart(isnan(dimeStart)) = 0;
 startTime = max([actiStart,dimeStart],[],2);
 stopTime = startTime + days;
 
 % Determine the season
-month = str2double(datestr(startTime,'mm'));
-idxSeason = month < 3 | month >= 11;
-outputData.season{idxSeason} = 'winter';
-outputData.season{~idxSeason} = 'summer';
+monthStr = datestr(startTime,'mm');
+monthCell =  mat2cell(monthStr,ones(length(monthStr),1));
+month = str2double(monthCell);
+idxSeason = month < 3 | month >= 11; % true = winter, false = summer
 
 %% Begin main loop
 for s = 1:lengthSub
     disp(['s = ',num2str(s),' Subject: ',num2str(subject(s)),...
         ' Intervention: ',num2str(week(s))]);
+    
+    if idxSeason(s)
+        outputData.season{s} = 'winter';
+    else
+        outputData.season{s} = 'summer';
+    end
     
     if(~isempty(actiPath{s,1}))
 		
@@ -100,7 +109,7 @@ for s = 1:lengthSub
         % Remove excess data and not an number values
         idx1 = isnan(PIMrs) | dTime < startTime(s) | dTime > stopTime(s);
         % Remove specified sections if any
-        if (~isnan(cropStart))
+        if (~isnan(rmStart(s)))
             idx2 = dTime >= rmStart(s) & dTime <= rmStop(s);
         else
             idx2 = false(length(dTime),1);
