@@ -58,7 +58,7 @@ for s = 1:lengthSub
 		title = ['Subject ',num2str(subject(s)),...
             ' Intervention ',num2str(week(s))];
 		subjectSavePath = fullfile( savePath, num2str(subject(s)) );
-		if ~exist(subjectSavePath, 'dir')
+        if ~exist(subjectSavePath, 'dir')
 			mkdir(subjectSavePath);
         end
 		
@@ -70,7 +70,6 @@ for s = 1:lengthSub
         end
 		
         % Reads the data from the actiwatch data file
-        [aTime, PIM] = deal(0);
         try
             [aTime, PIM] = importActiwatch(actiPath{s});
         catch err
@@ -78,7 +77,6 @@ for s = 1:lengthSub
             continue;
         end
         % Reads the data from the dimesimeter data file
-        [dTime, CS, AI] = deal(0);
         try
             [dTime, CS, AI] = importDime(dimePath{s, 1},dimeSN(s));
         catch err
@@ -88,7 +86,15 @@ for s = 1:lengthSub
 		
         % Resample the actiwatch activity for dimesimeter times
         PIMts = timeseries(PIM,aTime);
-        PIMrs = resample(PIMts,dTime);
+        PIMts = resample(PIMts,dTime);
+        PIMrs = PIMts.Data;
+        
+        % Remove excess data and not an number values
+        idx1 = isnan(PIMrs) | dTime < startTime(s) | dTime > stopTime(s);
+        dTime = dTime(~idx1);
+        PIM = PIMrs(~idx1);
+        AI = AI(~idx1);
+        CS = CS(~idx1);
         
         %Determine the season
         if week(s) == 0
