@@ -69,32 +69,17 @@ for s = 1:lengthSub
             continue;
         end
 		
-		%Gets the file location of the .mat file. If it doesn't exist, then
-		%information about the subjects will be generated from the data
-		%files
-		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_',...
-            num2str(week(s)),'.mat']);
-        
-		if (~exist(matFilePath, 'file'))
-			%Reads the data from the actiwatch data file
-			[activity, ZCM, TAT, time] = deal(0);
-            try
-				[activity, ZCM, TAT, time] =...
-                    read_actiwatch_data(actiPath{s});
-            catch err
-				reportError( title, err.message, savePath );
-				continue;
-            end
-			%Reads the data from the dimesimeter data file
-			[dtime, lux, CLA, CS, dactivity, temp, x, y] =...
-                dimedata(dimePath{s, 1},dimeSN(s));
-			
-			
-			save(matFilePath,'activity','ZCM','TAT','time','dtime',...
-                'lux','CLA','CS','dactivity','temp','x','y');
-		else
-			load(matFilePath);
-		end
+        %Reads the data from the actiwatch data file
+        [pimTS] = deal(0);
+        try
+            pimTS = importActiwatch(actiPath{s});
+        catch err
+            reportError( title, err.message, savePath );
+            continue;
+        end
+        %Reads the data from the dimesimeter data file
+        [dtime, lux, CLA, CS, dactivity, temp, x, y] =...
+            dimedata(dimePath{s, 1},dimeSN(s));
 		
         % Crops data
         
