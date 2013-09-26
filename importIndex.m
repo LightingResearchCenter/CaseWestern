@@ -82,3 +82,11 @@ rmStop = data(:,9);
 [pathstr, ~, ~] = fileparts(workbookFile);
 dimePath = fullfile(pathstr,dimePath);
 actiPath = fullfile(pathstr,actiPath);
+
+%% Default empty days values to 7
+%Find all the entries with an empty numDays value
+emptyNumDays =  isnan(days);
+%Set the default value for the numDays to 7
+days(emptyNumDays) = 7;
+
+end

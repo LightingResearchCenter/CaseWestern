@@ -2,19 +2,16 @@ function CaseWesternAnalysis
 addpath('IO','phasorAnalysis');
 
 %% Read in data from excel spreadsheet of dimesimeter/actiwatch info
+% Set starting path to look in
 startingFile = fullfile([filesep,filesep],'root','projects',...
     'NIH Alzheimers','CaseWesternData','index.xlsx');
+% Select lookup table file
 [workbookName, workbookPath] = uigetfile(startingFile,...
     'Select Subject Information Spreadsheet');
 workbookFile = fullfile(workbookPath,workbookName);
+% Import contents of lookup file
 [subject,week,days,dimeStart,dimeSN,dimePath,actiStart,~,...
     actiPath,rmStart,rmStop] = importIndex(workbookFile);
-
-%% Parse data from excel spreadsheet
-%Find all the entries with an empty numDays value
-emptyNumDays =  isnan(days);
-%Set the default value for the numDays to 7
-days(emptyNumDays) = 7;
 
 %% Select an output location
 savePath = uigetdir(fullfile(workbookPath,'Analysis'));
