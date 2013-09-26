@@ -1,4 +1,4 @@
-function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
+function [PIM, ZCM, TAT, time] = read_actiwatch_data(path)
 	
 	try
 		dataArray = importfile(path); %Imports data as a struct from actiwatch data files
@@ -31,15 +31,7 @@ function [PIM, ZCM, TAT, time] = read_actiwatch_data(path, start, stop)
     time = datenum(date1, 'mm/dd/yyyy') + datenum(hour, 'HH:MM:SS') - datenum('00:00');
 	if start < time(1) || stop > time(end)
 		error('Actiwatch start/stop times mismatch')
-	end
-	
-    %Eliminates data outside of start and end times
-    q = find((time >= start) & (time <= stop));
-    time = time(q);
-    PIM = PIM(q);
-    TAT = TAT(q);
-    ZCM = ZCM(q);
-    %sleep = sleep(q);
+    end
     
 end
 

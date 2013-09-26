@@ -80,14 +80,14 @@ for s = 1:lengthSub
 			[activity, ZCM, TAT, time] = deal(0);
             try
 				[activity, ZCM, TAT, time] =...
-                    read_actiwatch_data(actiPath{s},startTime(s),stopTime(s));
+                    read_actiwatch_data(actiPath{s});
             catch err
 				reportError( title, err.message, savePath );
 				continue;
             end
 			%Reads the data from the dimesimeter data file
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] =...
-                dimedata(dimePath{s, 1},dimeSN(s),startTime(s),stopTime(s));
+                dimedata(dimePath{s, 1},dimeSN(s));
 			
 			
 			save(matFilePath,'activity','ZCM','TAT','time','dtime',...
@@ -97,17 +97,6 @@ for s = 1:lengthSub
 		end
 		
         % Crops data
-		startTime = max(time(1), dtime(1));
-		stopTime = min(time(end), dtime(end));
-        if length(time) > length(dtime)
-			[time,activity,ZCM,TAT] =...
-                trimData(time,startTime,stopTime,rmStart(s),rmStop(s),...
-                activity,ZCM,TAT);
-        elseif length(time) < length(dtime)
-			[dtime,lux,CLA,CS,dactivity,temp,x,y] =...
-                trimData(dtime,startTime,stopTime,rmStart(s),rmStop(s),...
-                lux,CLA,CS,dactivity, temp, x, y);
-        end
         
         %Determine the season
         if week(s) == 0
