@@ -17,17 +17,17 @@ workbookFile = fullfile(workbookPath,workbookName);
 savePath = uigetdir(fullfile(workbookPath,'Analysis'));
 
 %% Creates a text file that records any errors in the data in the same path
-%as the results
+% as the results
 fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
 %%
-%Matches actiwatch and dimesimeter data: variables with 'd' prefix come
-%from dimesimeter and variables without the 'd' come from actiwatch data
-%sub = subject #, int = intervention #, dime = dimesimeter #, start = start
-%time, file = datafile path, numdays = # of days to be analyzed after the
-%start date
+% Matches actiwatch and dimesimeter data: variables with 'd' prefix come
+% from dimesimeter and variables without the 'd' come from actiwatch data
+% sub = subject #, int = intervention #, dime = dimesimeter #, start = start
+% time, file = datafile path, numdays = # of days to be analyzed after the
+% start date
 
 % Set start and stop times for analysis
 startTime = max([actiStart,dimeStart],[],2);
@@ -53,40 +53,42 @@ for s = 1:lengthSub
     
     if(~isempty(actiPath{s,1}))
 		
-		%Creates a title and savepath from the Subject name and
-		%intervention number
+		% Creates a title and savepath from the Subject name and
+		% intervention number
 		title = ['Subject ',num2str(subject(s)),...
             ' Intervention ',num2str(week(s))];
 		subjectSavePath = fullfile( savePath, num2str(subject(s)) );
 		if ~exist(subjectSavePath, 'dir')
 			mkdir(subjectSavePath);
-		end
+        end
 		
-        %Checks if there is a listed actiwatch file for the subject and if
-        %there is not it moves to the next subject
+        % Checks if there is a listed actiwatch file for the subject and if
+        % there is not it moves to the next subject
         if (isempty(actiPath(s)) == 1)
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
         end
 		
-        %Reads the data from the actiwatch data file
-        pimTS = deal(0);
+        % Reads the data from the actiwatch data file
+        [aTime, PIM] = deal(0);
         try
-            pimTS = importActiwatch(actiPath{s});
+            [aTime, PIM] = importActiwatch(actiPath{s});
         catch err
             reportError( title, err.message, savePath );
             continue;
         end
-        %Reads the data from the dimesimeter data file
-        [csTS, aiTS] = deal(0);
+        % Reads the data from the dimesimeter data file
+        [dTime, CS, AI] = deal(0);
         try
-            [csTS, aiTS] = importDime(dimePath{s, 1},dimeSN(s));
+            [dTime, CS, AI] = importDime(dimePath{s, 1},dimeSN(s));
         catch err
             reportError( title, err.message, savePath );
             continue;
         end
 		
-        % Crops data
+        % Resample the actiwatch activity for dimesimeter times
+        PIMts = timeseries(PIM,aTime);
+        PIMrs = resample(PIMts,dTime);
         
         %Determine the season
         if week(s) == 0

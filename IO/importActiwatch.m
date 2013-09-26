@@ -1,4 +1,4 @@
-function pimTS = importActiwatch(filename, startRow, endRow)
+function [aTime, PIM] = importActiwatch(filename, startRow, endRow)
 %IMPORTACTIWATCH Import data from an actiwatch CSV file and return as a
 %   timeseries
 %
@@ -71,10 +71,7 @@ date1 = date1(~idx);
 hour = hour(~idx);
 
 %% Create time array in MATLAB serial date format
-time = datenum(date1,'mm/dd/yyyy') + datenum(hour,'HH:MM:SS') - datenum('00:00');
-
-%% Convert data to a timeseries objects
-pimTS = timeseries(PIM,time);
+aTime = datenum(date1,'mm/dd/yyyy') + datenum(hour,'HH:MM:SS') - datenum('00:00');
 
 
 end
