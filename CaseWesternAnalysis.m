@@ -91,10 +91,20 @@ for s = 1:lengthSub
         
         % Remove excess data and not an number values
         idx1 = isnan(PIMrs) | dTime < startTime(s) | dTime > stopTime(s);
-        dTime = dTime(~idx1);
-        PIM = PIMrs(~idx1);
-        AI = AI(~idx1);
-        CS = CS(~idx1);
+        % Remove specified sections if any
+        if (~isnan(cropStart))
+            idx2 = dTime >= rmStart(s) & dTime <= rmStop(s);
+        else
+            idx2 = false(length(dTime),1);
+        end
+        idx3 = ~(idx1 | idx2);
+        dTime = dTime(idx3);
+        PIM = PIMrs(idx3);
+        AI = AI(idx3);
+        CS = CS(idx3);
+        
+        % Normalize Actiwatch activity to Dimesimeter activity
+        AIn = PIM*(mean(AI)/mean(PIM));
         
         %Determine the season
         if week(s) == 0
@@ -106,38 +116,12 @@ for s = 1:lengthSub
             end
         end
         
-        % Continues if there is an error in the dates of the actiwatch
-        if length(time) ~= length(dtime)
-			reportError(title,'Mismatch in number of actiwatch values',...
-                savePath);
-            continue
-        end
-
-        %sets time from dimesimeter and actiwatch equal in order to avoid
-        %discrepancies on the order of 1^-3 seconds
-        if (max(abs(dtime-time)) < 1e-3)
-            time = dtime;
-		else
-			reportError(title,...
-                'Difference in times between dimesimeter and actiwatch is more than 00.001 seconds',...
-                savePath);
-            disp(['Error: the difference in times between dimesimeter and actiwatch is more than 00.001 seconds',...
-                '\nSubject: ',num2str(subject(s)),'\nIntervention: ',...
-                num2str(int(s))])
-            continue
-        end    
-
-        [time,lux,CLA,CS,activity,ZCM,TAT, dactivity, temp, x, y] =...
-			trimData(time,startTime,stopTime,rmStart(s),rmStop(s),lux,...
-			CLA,CS,activity,ZCM,TAT,dactivity,temp,x,y);
-
-        nactivity = (mean(dactivity)/mean(activity))*activity;
 		try
 			[outputData.phasorMagnitude(s),outputData.phasorAngle(s),...
 				outputData.IS(s),outputData.IV(s),outputData.meanCS(s),...
 				outputData.magnitudeWithHarmonics(s),...
 				outputData.magnitudeFirstHarmonic(s)] =...
-                phasorAnalysis(time,CS,nactivity);
+                phasorAnalysis(dTime,CS,AIn);
 		catch err
 				reportError(title,err.message,savePath);
 				continue;
