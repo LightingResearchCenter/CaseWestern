@@ -29,6 +29,10 @@ fclose( fid );
 %time, file = datafile path, numdays = # of days to be analyzed after the
 %start date
 
+% Set start and stop times for analysis
+startTime = max([actiStart,dimeStart],[],2);
+stopTime = startTime + days;
+
 % Preallocate output dataset
 lengthSub = length(subject);
 outputData = dataset;
@@ -70,22 +74,20 @@ for s = 1:lengthSub
 		%files
 		matFilePath = fullfile(subjectSavePath, ['dime_watch_data_',...
             num2str(week(s)),'.mat']);
-		
-		startTime = max(actiStart(s), dimeStart(s));
-		stopTime = startTime + days(s);
+        
 		if (~exist(matFilePath, 'file'))
 			%Reads the data from the actiwatch data file
 			[activity, ZCM, TAT, time] = deal(0);
             try
 				[activity, ZCM, TAT, time] =...
-                    read_actiwatch_data(actiPath{s},startTime,stopTime);
+                    read_actiwatch_data(actiPath{s},startTime(s),stopTime(s));
             catch err
 				reportError( title, err.message, savePath );
 				continue;
             end
 			%Reads the data from the dimesimeter data file
 			[dtime, lux, CLA, CS, dactivity, temp, x, y] =...
-                dimedata(dimePath{s, 1},dimeSN(s),startTime,stopTime);
+                dimedata(dimePath{s, 1},dimeSN(s),startTime(s),stopTime(s));
 			
 			
 			save(matFilePath,'activity','ZCM','TAT','time','dtime',...
