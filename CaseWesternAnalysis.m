@@ -70,14 +70,9 @@ for s = 1:lengthSub
     
     if(~isempty(actiPath{s,1}))
 		
-		% Creates a title and savepath from the Subject name and
-		% intervention number
+		% Creates a title from the Subject name and intervention number
 		title = ['Subject ',num2str(subject(s)),...
             ' Intervention ',num2str(week(s))];
-		subjectSavePath = fullfile( savePath, num2str(subject(s)) );
-        if ~exist(subjectSavePath, 'dir')
-			mkdir(subjectSavePath);
-        end
 		
         % Checks if there is a listed actiwatch file for the subject and if
         % there is not it moves to the next subject
