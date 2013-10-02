@@ -64,7 +64,7 @@ for i = 1:length(red)
             blue(i) = [];
             activity(i) = [];
             i = i - 1;
-            total = total - 1
+            total = total - 1;
         end
        
         resets = resets + 1;        %keep track of number of resets
@@ -102,7 +102,7 @@ green = green*cal(2);
 blue = blue*cal(3);
 
 [lux, CLA] = dimeluxCLA_09Aug2011(red, green, blue, id);
-CLA(find(CLA < 0)) = 0;
+CLA(CLA < 0) = 0;
 
 %find chromaticity coordinates
 tristim = [red green blue] * chrom;
@@ -123,7 +123,7 @@ activity((find((activity < max(activity)) & (activity > 2)))) = activity((find((
 
 %save the processed data in a file if a second filename was passed to the
 %function
-if(length(varargin) > 0)
+if(~isempty(varargin))
     fid = fopen(varargin{1},'w');
     fprintf(fid, 'time\tlux\tCLA\tactivity\ttemperature\tx\ty\r\n');
     for i = 1:length(time)

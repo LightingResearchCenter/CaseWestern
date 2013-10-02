@@ -80,6 +80,11 @@ for s = 1:lengthSub
 			reportError( title, 'No actiwatch data available', savePath );
             continue;
         end
+        % Check if actiwatch file exists
+        if exist(actiPath{s},'file') ~= 2
+            warning(['Actiwatch file does not exist. File: ',actiPath{s}]);
+            continue;
+        end
 		
         % Reads the data from the actiwatch data file
         try
