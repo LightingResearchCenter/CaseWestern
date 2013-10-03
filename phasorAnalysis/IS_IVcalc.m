@@ -13,7 +13,7 @@ if dt>3600
     error('Cannot compute statistic becasue time increment is larger than one hour');
 end
 dthours = dt/3600;
-if (rem(1/dthours,1) ~= 0)
+if (rem(1/dthours,1) > eps)
     warning('dt does not divide into an hour without a remainder');
 end
 % Convert to hourly data increments

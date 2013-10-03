@@ -2,7 +2,7 @@ function [phasorMagnitude, phasorAngle, IS, IV, mCS, MagH, f24abs] = phasorAnaly
 %PHASORANALYSIS Performs analysis on CS and activity
 
 %% Process and analyze data
-Srate = 1/((time(2)-time(1))*(24*3600)); % sample rate in Hertz
+Srate = 1/(round(((time(2)-time(1))*(24*3600))*1000)/1000); % sample rate in Hertz
 % Calculate inter daily stability and variablity
 [IS,IV] = IS_IVcalc(activity,1/Srate);
 
