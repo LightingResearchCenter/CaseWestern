@@ -30,12 +30,7 @@ vAttNames = fieldnames(vAttInfo);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if numVars > 0
     for i1 = 1:numVars
-        if strcmp('epoch',varTypes(i1))
-            data.('Variables').(varNames{i1}) = ...
-                datestr(cell2mat(rawData(:,i1)),'dd/mm/yyyy HH:MM:SS');
-        else
-            data.('Variables').(varNames{i1}) =  cell2mat(rawData(:,i1));
-        end
+        data.('Variables').(varNames{i1}) =  cell2mat(rawData(:,i1));
     end
 end
 

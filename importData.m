@@ -22,8 +22,8 @@ CDFactiPath = regexprep(actiPath,'\.csv','.cdf');
 % Check if CDF versions exist
 if exist(CDFactiPath,'file') == 2 % CDF Actiwatch file exists
     actiData = ProcessCDF(CDFactiPath);
-    aTime = actiData.Time;
-    PIM = actiData.Activity;
+    aTime = actiData.Variables.Time;
+    PIM = actiData.Variables.Activity;
 else % CDF Actiwatch file does not exist
     % Reads the data from the actiwatch data file
     [aTime,PIM] = importActiwatch(actiPath);
@@ -37,9 +37,9 @@ CDFdaysimPath = regexprep(daysimPath,'\.txt','.cdf');
 % Check if CDF versions exist
 if exist(CDFdaysimPath,'file') == 2 % CDF Daysimeter file exists
     daysimData = ProcessCDF(CDFdaysimPath);
-    dTime = daysimData.Time;
-    CS = daysimData.CS;
-    AI = daysimData.Activity;
+    dTime = daysimData.Variables.Time;
+    CS = daysimData.Variables.CS;
+    AI = daysimData.Variables.Activity;
 else % CDF Actiwatch file does not exist
     % Reads the data from the dimesimeter data file
     [dTime,lux,CLA,CS,AI] = importDime(daysimPath,daysimSN);
