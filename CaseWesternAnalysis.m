@@ -102,25 +102,36 @@ for i1 = 1:lengthSub
         reportError( title, err.message, savePath );
         continue;
     end
-
+    
+    % Crop data to overlapping section
+    cropStart = max(min(dTime),min(aTime));
+    cropEnd = min(max(dTime),max(aTime));
+    idx1 = dTime < cropStart | dTime > cropEnd;
+    dTime(idx1) = [];
+    CS(idx1) = [];
+    AI(idx1) = [];
+    idx2 = aTime < cropStart | aTime > cropEnd;
+    aTime(idx2) = [];
+    PIM(idx2) = [];
+    
     % Resample the actiwatch activity for dimesimeter times
     PIMts = timeseries(PIM,aTime);
     PIMts = resample(PIMts,dTime);
     PIMrs = PIMts.Data;
 
     % Remove excess data and not an number values
-    idx1 = isnan(PIMrs) | dTime < startTime(i1) | dTime > stopTime(i1);
+    idx3 = isnan(PIMrs) | dTime < startTime(i1) | dTime > stopTime(i1);
     % Remove specified sections if any
     if (~isnan(rmStart(i1)))
-        idx2 = dTime >= rmStart(i1) & dTime <= rmStop(i1);
+        idx4 = dTime >= rmStart(i1) & dTime <= rmStop(i1);
     else
-        idx2 = false(length(dTime),1);
+        idx4 = false(length(dTime),1);
     end
-    idx3 = ~(idx1 | idx2);
-    dTime = dTime(idx3);
-    PIM = PIMrs(idx3);
-    AI = AI(idx3);
-    CS = CS(idx3);
+    idx5 = ~(idx3 | idx4);
+    dTime = dTime(idx5);
+    PIM = PIMrs(idx5);
+    AI = AI(idx5);
+    CS = CS(idx5);
 
     % Normalize Actiwatch activity to Dimesimeter activity
     AIn = PIM*(mean(AI)/mean(PIM));
