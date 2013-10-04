@@ -100,20 +100,31 @@ end
 close(fig); % Close the figure window
 end
 
-function plotCSAI(time, CS, AI, fig, figTitle, savePath)
+function plotCSAI(dTime, CS, AI, fig, figTitle, savePath)
 clf(fig); % Clear the figure window
 
-subplot(2, 1, 1)
-area(time, CS)
-ylabel('CS')
-ylim([0 1])
-datetick('x')
+% Plot CS
+subplot(2, 1, 1);
+area(dTime, CS);
+ylabel('CS');
+ylim([0 1]);
+if (dTime(end) - dTime(1)) > 1
+    datetick('x',2,'keeplimits');
+else
+    datetick('x','mm/dd/yy HH:MM','keeplimits');
+end
+% Plot AI
+subplot(2, 1, 2);
+area(dTime, AI);
+ylabel('activity');
+if (dTime(end) - dTime(1)) > 1
+    datetick('x',2,'keeplimits');
+else
+    datetick('x','mm/dd/yy HH:MM','keeplimits');
+end
 
-subplot(2, 1, 2)
-area(time, AI)
-ylabel('activity')
-datetick('x')
-title(figTitle,'Interpreter','none')
+% Plot the title
+title(figTitle,'Interpreter','none');
 
 %Saves the graph
 saveas(fig, savePath);
