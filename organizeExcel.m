@@ -1,10 +1,6 @@
-function organizeExcel
+function organizeExcel(inputFile)
 %ORGANIZEEXCEL Organize input data and save to Excel
 %   Format for Mariana
-savePath = fullfile([filesep,filesep],'root','projects',...
-    'NIH Alzheimers','CaseWesternData','Analysis');
-[inputName, inputPath] = uigetfile(fullfile(savePath,'*.mat'));
-inputFile = fullfile(inputPath,inputName);
 load(inputFile);
 saveFile = regexprep(inputFile,'\.mat','\.xlsx');
 inputData = outputData;

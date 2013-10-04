@@ -104,9 +104,11 @@ for i1 = 1:lengthSub
 end
 
 %% Save output
-outputFile = fullfile(saveDir,'output.mat');
-save(outputFile,'outputData')
+outputFile = fullfile(saveDir,'output_',datestr(now,'yy-mm-dd'),'.mat');
+save(outputFile,'outputData');
+% Convert to Excel
+organizeExcel(outputFile);
 
-%% Turn warning back on
+%% Turn warnings back on
 warning(s);
 end
