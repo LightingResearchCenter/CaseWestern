@@ -79,8 +79,8 @@ end
 % activity(find((red < max(red)) & (red > 10000))) = activity(find((red < max(red)) & (red > 10000)) - 1);
 
 %display number of resets, and when they occured
-disp(['Number of resets = ',num2str(resets)]);
 if(resets > 0)
+    disp(['Number of resets = ',num2str(resets)]);
     disp('reset times: ');
     disp(datestr((time(reset)/(3600*24)+6.954217798611112e+005) - (1/24) + (17/1440)));
 end
