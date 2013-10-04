@@ -6,7 +6,7 @@ function BatchCaseWesternAnalysis
 s = warning('off','MATLAB:linearinter:noextrap');
 
 %% Enable paths to required subfunctions
-addpath('IO','phasorAnalysis');
+addpath('phasorAnalysis');
 
 %% File handling
 caseWesternHome = fullfile([filesep,filesep],'root','projects',...
