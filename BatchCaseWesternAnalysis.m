@@ -3,7 +3,8 @@ function BatchCaseWesternAnalysis
 %   Detailed description goes here
 
 %% Trun warning off
-s = warning('off','MATLAB:linearinter:noextrap');
+s1 = warning('off','MATLAB:linearinter:noextrap');
+s2 = warning('off','MATLAB:xlswrite:AddSheet');
 
 %% Enable paths to required subfunctions
 addpath('phasorAnalysis');
@@ -110,5 +111,6 @@ save(outputFile,'outputData');
 organizeExcel(outputFile);
 
 %% Turn warnings back on
-warning(s);
+warning(s2);
+warning(s1);
 end
