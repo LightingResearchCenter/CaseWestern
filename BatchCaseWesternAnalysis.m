@@ -5,30 +5,25 @@ function BatchCaseWesternAnalysis
 %% Trun warning off
 s = warning('off','MATLAB:linearinter:noextrap');
 
-%% Enable paths to rewuired subfunctions
+%% Enable paths to required subfunctions
 addpath('IO','phasorAnalysis');
 
 %% File handling
-
+caseWesternHome = fullfile([filesep,filesep],'root','projects',...
+    'NIH Alzheimers','CaseWesternData');
 % Read in data from excel spreadsheet of dimesimeter/actiwatch info
-% Set starting path to look in
-startingFile = fullfile([filesep,filesep],'root','projects',...
-    'NIH Alzheimers','CaseWesternData','index.xlsx');
-% Select lookup table file
-[workbookName, workbookPath] = uigetfile(startingFile,...
-    'Select Subject Information Spreadsheet');
-workbookFile = fullfile(workbookPath,workbookName);
+workbookFile = fullfile(caseWesternHome,'index.xlsx');
 % Import contents of lookup file
 [subject,week,days,daysimStart,daysimSN,daysimPath,actiStart,~,...
     actiPath,rmStart,rmStop] = importIndex(workbookFile);
 
 %% Select an output location
-savePath = uigetdir(fullfile(workbookPath,'Analysis'),...
+saveDir = uigetdir(fullfile(caseWesternHome,'Analysis'),...
     'Select an output location');
 
 %% Creates a text file that records any errors in the data in the same path
 % as the results
-fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'w' );
+fid = fopen( fullfile( saveDir, 'Error Report.txt' ), 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
@@ -86,7 +81,7 @@ for i1 = 1:lengthSub
         [aTime,PIM,dTime,CS,AI] = ...
             importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
     catch err
-        reportError( header, err.message, savePath );
+        reportError( header, err.message, saveDir );
         continue;
     end
     
@@ -103,13 +98,13 @@ for i1 = 1:lengthSub
             outputData.magnitudeFirstHarmonic(i1)] =...
             phasorAnalysis(dTime,CS,AI);
     catch err
-            reportError(header,err.message,savePath);
+            reportError(header,err.message,saveDir);
             continue;
     end
 end
 
 %% Save output
-outputFile = fullfile(savePath,'output.mat');
+outputFile = fullfile(saveDir,'output.mat');
 save(outputFile,'outputData')
 
 %% Turn warning back on
