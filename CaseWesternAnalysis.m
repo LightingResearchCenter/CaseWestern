@@ -2,6 +2,9 @@ function CaseWesternAnalysis
 %CASEWESTERNANALYSIS Desciption goes here
 %   Detailed description goes here
 
+%% Trun warning off
+s = warning('off','MATLAB:DELETE:Permission');
+
 %% Enable paths to rewuired subfunctions
 addpath('IO','phasorAnalysis');
 
@@ -151,4 +154,7 @@ end
 %% Save output
 outputFile = fullfile(savePath,'output.mat');
 save(outputFile,'outputData')
+
+%% Turn warning back on
+warning(s);
 end
