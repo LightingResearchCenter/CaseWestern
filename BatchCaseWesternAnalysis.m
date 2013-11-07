@@ -28,19 +28,35 @@ fid = fopen( fullfile( saveDir, 'Error Report.txt' ), 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
-%% Preallocate output dataset
+%% Preallocate variables
 lengthSub = length(subject);
-outputData = dataset;
-outputData.subject = subject;
-outputData.week = week;
-outputData.phasorMagnitude = zeros(lengthSub,1);
-outputData.phasorAngle = zeros(lengthSub,1);
-outputData.IS = zeros(lengthSub,1);
-outputData.IV = zeros(lengthSub,1);
-outputData.meanCS = zeros(lengthSub,1);
-outputData.magnitudeWithHarmonics = zeros(lengthSub,1);
-outputData.magnitudeFirstHarmonic = zeros(lengthSub,1);
-outputData.season = cell(lengthSub,1);
+% Preallocate phasor struct
+phasorData = struct;
+phasorData.subject = subject;
+phasorData.week = week;
+phasorData.phasorMagnitude = zeros(lengthSub,1);
+phasorData.phasorAngle = zeros(lengthSub,1);
+phasorData.IS = zeros(lengthSub,1);
+phasorData.IV = zeros(lengthSub,1);
+phasorData.meanCS = zeros(lengthSub,1);
+phasorData.magnitudeWithHarmonics = zeros(lengthSub,1);
+phasorData.magnitudeFirstHarmonic = zeros(lengthSub,1);
+phasorData.season = cell(lengthSub,1);
+% Preallocate sleep struct
+sleepData = struct;
+sleepData.subject = subject;
+sleepData.week = week;
+sleepData.season = cell(lengthSub,1);
+sleepData.ActualSleep = cell(lengthSub,1);
+sleepData.ActualSleepPercent = cell(lengthSub,1);
+sleepData.ActualWake = cell(lengthSub,1);
+sleepData.ActualWakePercent = cell(lengthSub,1);
+sleepData.SleepEfficiency = cell(lengthSub,1);
+sleepData.Latency = cell(lengthSub,1);
+sleepData.SleepBouts = cell(lengthSub,1);
+sleepData.WakeBouts = cell(lengthSub,1);
+sleepData.MeanSleepBout = cell(lengthSub,1);
+sleepData.MeanWakeBout = cell(lengthSub,1);
 
 %% Perform vectorized calculations
 
@@ -67,9 +83,11 @@ for i1 = 1:lengthSub
     
     % Assign a text value for season
     if idxSeason(i1)
-        outputData.season{i1} = 'winter';
+        phasorData.season{i1} = 'winter';
+        sleepData.season{i1} = 'winter';
     else
-        outputData.season{i1} = 'summer';
+        phasorData.season{i1} = 'summer';
+        sleepData.season{i1} = 'summer';
     end
     
     % Check if file paths are listed
@@ -86,29 +104,40 @@ for i1 = 1:lengthSub
         continue;
     end
     
-    % Resample and normaliz Actiwatch data to Daysimeter data
+    % Resample and normalize Actiwatch data to Daysimeter data
     [dTime,CS,AI] = ...
         combineData(aTime,PIM,dTime,CS,AI,...
         startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
     
     % Attempt to perform phasor analysis on the combined data
     try
-        [outputData.phasorMagnitude(i1),outputData.phasorAngle(i1),...
-            outputData.IS(i1),outputData.IV(i1),outputData.meanCS(i1),...
-            outputData.magnitudeWithHarmonics(i1),...
-            outputData.magnitudeFirstHarmonic(i1)] =...
+        [phasorData.phasorMagnitude(i1),phasorData.phasorAngle(i1),...
+            phasorData.IS(i1),phasorData.IV(i1),phasorData.meanCS(i1),...
+            phasorData.magnitudeWithHarmonics(i1),...
+            phasorData.magnitudeFirstHarmonic(i1)] =...
             phasorAnalysis(dTime,CS,AI);
     catch err
             reportError(header,err.message,saveDir);
-            continue;
+    end
+    
+    % Attempt to perform sleep analysis
+    try
+        [sleepData.ActualSleep(i1),sleepData.ActualSleepPercent(i1),...
+            sleepData.ActualWake(i1),sleepData.ActualWakePercent(i1),...
+            sleepData.SleepEfficiency(i1),sleepData.Latency(i1),...
+            sleepData.SleepBouts(i1),sleepData.WakeBouts(i1),...
+            sleepData.MeanSleepBout(i1),sleepData.MeanWakeBout(i1)] = ...
+            AnalyzeFile(dTime,AI,BedTime,WakeTime);
+    catch err
+        reportError(header,err.message,saveDir);
     end
 end
 
 %% Save output
 outputFile = fullfile(saveDir,['output_',datestr(now,'yy-mm-dd'),'.mat']);
-save(outputFile,'outputData');
+save(outputFile,'phasorData','sleepData');
 % Convert to Excel
-organizeExcel(outputFile);
+organizeExcel(phasorData);
 
 %% Turn warnings back on
 warning(s2);

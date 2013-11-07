@@ -1,15 +1,11 @@
-function organizeExcel(inputFile)
+function organizeExcel(phasorData)
 %ORGANIZEEXCEL Organize input data and save to Excel
 %   Format for Mariana
-load(inputFile);
-saveFile = regexprep(inputFile,'\.mat','\.xlsx');
-inputData = outputData;
-clear outputData;
 
 %% Determine size of input and variable names
-[~,varCount] = size(inputData);
+[~,varCount] = size(phasorData);
 varCount = varCount - 3; % Do not count subject number, week, or season
-varNames = get(inputData,'VarNames');
+varNames = get(phasorData,'VarNames');
 % Remove subject, week, and season from varNames
 varNameIdx = strcmpi(varNames,'subject') | strcmpi(varNames,'week') | strcmpi(varNames,'season');
 varNames(varNameIdx) = [];
@@ -38,16 +34,16 @@ header = [header1;header2];
 
 %% Organize data
 % Remove empty lines
-idx = inputData.phasorMagnitude == 0 & inputData.phasorAngle == 0 & inputData.IS == 0 & inputData.IV == 0 & inputData.meanCS == 0;
-inputData(idx,:) = [];
+idx = phasorData.phasorMagnitude == 0 & phasorData.phasorAngle == 0 & phasorData.IS == 0 & phasorData.IV == 0 & phasorData.meanCS == 0;
+phasorData(idx,:) = [];
 % Seperate subject, week, and season from rest of inputData
 inputData1 = dataset;
-inputData1.subject = inputData.subject;
-inputData1.week = inputData.week;
-inputData1.season = inputData.season;
+inputData1.subject = phasorData.subject;
+inputData1.week = phasorData.week;
+inputData1.season = phasorData.season;
 
 % Copy inputData and remove subject, week, and season
-inputData2 = inputData;
+inputData2 = phasorData;
 inputData2.subject = [];
 inputData2.week = [];
 inputData2.season = [];
