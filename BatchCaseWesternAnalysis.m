@@ -129,6 +129,9 @@ for i1 = 1:lengthSub
             sleepData.SleepBouts(i1),sleepData.WakeBouts(i1),...
             sleepData.MeanSleepBout(i1),sleepData.MeanWakeBout(i1)] = ...
             AnalyzeFile(aTime,PIM,BedTime,WakeTime);
+        
+        dt = etime(datevec(aTime(2)),datevec(aTime(1)));
+        [sleepData.actiIS(i1),sleepData.actiIV(i1)] = IS_IVcalc(PIM,dt);
     catch err
         reportError(header,err.message,saveDir);
     end
