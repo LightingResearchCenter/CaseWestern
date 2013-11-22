@@ -1,10 +1,5 @@
-function SleepState = FindSleepState(Activity,Threshold,epoch)
+function SleepState = FindSleepState(Activity,Threshold)
 %SLEEPSTATE Calculate sleep state using LRC simple method
-
-% Set Threshold value
-if strcmpi(Threshold,'auto')
-    Threshold = mean(Activity)*0.888/epoch;
-end
 
 % Make Activity array vertical if not already
 [y,x] = size(Activity);

@@ -44,7 +44,7 @@ phasorData.magnitudeWithHarmonics = zeros(lengthSub,1);
 phasorData.magnitudeFirstHarmonic = zeros(lengthSub,1);
 phasorData.season = cell(lengthSub,1);
 % Preallocate sleep struct
-sleepData = struct;
+sleepData = dataset;
 sleepData.subject = subject;
 sleepData.week = week;
 sleepData.season = cell(lengthSub,1);
@@ -146,6 +146,8 @@ save(outputFile,'phasorData','sleepData');
 % Convert to Excel
 phasorFile = fullfile(saveDir,['phasor_',datestr(now,'yy-mm-dd'),'.xlsx']);
 organizeExcel(phasorData,phasorFile);
+sleepFile = fullfile(saveDir,['sleep_',datestr(now,'yy-mm-dd'),'.xlsx']);
+organizeSleepExcel(sleepData,sleepFile);
 
 %% Turn warnings back on
 warning(s2);

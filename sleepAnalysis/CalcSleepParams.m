@@ -16,7 +16,7 @@ Activity = Activity(idx);
 Epoch = etime(datevec(Time(2)),datevec(Time(1))); % Find epoch length in seconds
 
 % Find the sleep state
-sleepState = FindSleepState(Activity,'auto',Epoch/60);
+sleepState = FindSleepState(Activity,40);
 
 % Find sleep state in a 10 minute window
 n10 = ceil(600/Epoch); % Number of points in a 10 minute interval
