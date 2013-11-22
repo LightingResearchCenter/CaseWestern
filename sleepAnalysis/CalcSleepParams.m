@@ -11,16 +11,13 @@ function [SleepStart,SleepEnd,ActualSleep,ActualSleepPercent,...
 buffer = 5/(60*24); % 5 minute buffer
 idx = Time >= (bedTime - buffer) & Time <= (wakeTime + buffer);
 Time = Time(idx);
-try
-    Activity = gaussian(Activity(idx),4);
-catch
-end
+
+Epoch = etime(datevec(Time(2)),datevec(Time(1))); % Find epoch length in seconds
 
 % Find the sleep state
-sleepState = FindSleepState(Activity,'auto',3);
+sleepState = FindSleepState(Activity,'auto',Epoch/60);
 
 % Find sleep state in a 10 minute window
-Epoch = etime(datevec(Time(2)),datevec(Time(1))); % Find epoch length in seconds
 n10 = ceil(600/Epoch); % Number of points in a 10 minute interval
 n5 = floor((n10)/2);
 notSleepState = ~sleepState;

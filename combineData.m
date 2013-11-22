@@ -1,4 +1,4 @@
-function [dTime,CS,AI] = combineData(aTime,PIM,dTime,CS,AI,startTime,stopTime,rmStart,rmStop)
+function [dTime,CS,AI,aTime,PIM] = combineData(aTime,PIM,dTime,CS,AI,startTime,stopTime,rmStart,rmStop)
 %COMBINEDATA combine data from Actiwatch and Daysimeter
 %   Detailed description goes here
 
@@ -22,17 +22,21 @@ PIMrs = PIMts.Data;
 idx3 = isnan(PIMrs) | dTime < startTime | dTime > stopTime;
 % Remove specified sections if any
 if (~isnan(rmStart))
-    idx4 = dTime >= rmStart & dTime <= rmStop;
+    idx4a = dTime >= rmStart & dTime <= rmStop;
+    idx4b = aTime >= rmStart & aTime <= rmStop;
 else
-    idx4 = false(length(dTime),1);
+    idx4a = false(numel(dTime),1);
+    idx4b = false(numel(aTime),1);
 end
-idx5 = ~(idx3 | idx4);
-dTime = dTime(idx5);
-PIM = PIMrs(idx5);
-AI = AI(idx5);
-CS = CS(idx5);
+idx5a = ~(idx3 | idx4a);
+dTime = dTime(idx5a);
+aTime = aTime(~idx4b);
+PIM = PIM(~idx4b);
+PIM2 = PIMrs(idx5a);
+AI = AI(idx5a);
+CS = CS(idx5a);
 
 % Normalize Actiwatch activity to Dimesimeter activity
-AI = PIM*(mean(AI)/mean(PIM));
+AI = PIM2*(mean(AI)/mean(PIM2));
 
 end
