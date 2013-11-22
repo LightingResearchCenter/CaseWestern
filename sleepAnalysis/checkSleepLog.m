@@ -22,10 +22,12 @@ for i1 = 1:nDays
     dayStart = days(i1);
     dayStop = dayStart + 1;
     dayIdx = dTime >= dayStart & dTime < dayStop;
+    % calculate bed and get up times in case needed
+    [tempBedTime,tempGetUpTime] = createSleepLog(dTime(dayIdx),AI(dayIdx));
     % check for a bed time
     bedIdx = sleepLog.bedtime >= dayStart & sleepLog.bedtime < dayStop;
     if sum(bedIdx) == 0 % no valid bed time found
-        datasetout.bedtime(i1) = createBedTime(dTime(dayIdx),AI(dayIdx));% create a bed time
+        datasetout.bedtime(i1) = tempBedTime;% use artificial a bed time
     elseif sum(bedIdx) == 1 % one valid bed time found
         datasetout.bedtime(i1) = sleepLog.bedtime(bedIdx);
         datasetout.bedlog(i1) = true;
@@ -35,7 +37,7 @@ for i1 = 1:nDays
     % check for a get up time
     upIdx = sleepLog.getuptime >= dayStart & sleepLog.getuptime < dayStop;
     if sum(upIdx) == 0 % no valid bed time found
-        datasetout.getuptime(i1) = createGetUpTime(dTime(dayIdx),AI(dayIdx));% create a bed time
+        datasetout.getuptime(i1) = tempGetUpTime;% use artificial get up time
     elseif sum(upIdx) == 1 % one valid bed time found
         datasetout.getuptime(i1) = sleepLog.getuptime(upIdx);
         datasetout.getuplog(i1) = true;
