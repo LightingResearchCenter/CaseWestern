@@ -7,20 +7,21 @@ s1 = warning('off','MATLAB:linearinter:noextrap');
 s2 = warning('off','MATLAB:xlswrite:AddSheet');
 
 %% Enable paths to required subfunctions
-addpath('phasorAnalysis');
+addpath('phasorAnalysis','sleepAnalysis');
 
 %% File handling
 caseWesternHome = fullfile([filesep,filesep],'root','projects',...
     'NIH Alzheimers','CaseWesternData');
 % Read in data from excel spreadsheet of dimesimeter/actiwatch info
-workbookFile = fullfile(caseWesternHome,'index.xlsx');
-% Import contents of lookup file
+indexPath = fullfile(caseWesternHome,'index.xlsx');
 [subject,week,days,daysimStart,daysimSN,daysimPath,actiStart,~,...
-    actiPath,rmStart,rmStop] = importIndex(workbookFile);
+    actiPath,rmStart,rmStop] = importIndex(indexPath);
+% Import sleepLog
+sleepLogPath = fullfile(caseWesternHome,'sleepLog.xlsx');
+sleepLog = importSleepLog(sleepLogPath);
 
-%% Select an output location
-saveDir = uigetdir(fullfile(caseWesternHome,'Analysis'),...
-    'Select an output location');
+% Set an output location
+saveDir = fullfile(caseWesternHome,'Analysis');
 
 %% Creates a text file that records any errors in the data in the same path
 % as the results
