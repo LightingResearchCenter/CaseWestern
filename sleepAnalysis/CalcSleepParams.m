@@ -11,6 +11,7 @@ function [SleepStart,SleepEnd,ActualSleep,ActualSleepPercent,...
 buffer = 5/(60*24); % 5 minute buffer
 idx = Time >= (bedTime - buffer) & Time <= (wakeTime + buffer);
 Time = Time(idx);
+Activity = Activity(idx);
 
 Epoch = etime(datevec(Time(2)),datevec(Time(1))); % Find epoch length in seconds
 

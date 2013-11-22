@@ -32,7 +32,7 @@ fclose( fid );
 %% Preallocate variables
 lengthSub = length(subject);
 % Preallocate phasor struct
-phasorData = struct;
+phasorData = dataset;
 phasorData.subject = subject;
 phasorData.week = week;
 phasorData.phasorMagnitude = zeros(lengthSub,1);
@@ -58,6 +58,8 @@ sleepData.SleepBouts = cell(lengthSub,1);
 sleepData.WakeBouts = cell(lengthSub,1);
 sleepData.MeanSleepBout = cell(lengthSub,1);
 sleepData.MeanWakeBout = cell(lengthSub,1);
+sleepData.actiIS = cell(lengthSub,1);
+sleepData.actiIV = cell(lengthSub,1);
 
 %% Perform vectorized calculations
 
@@ -122,16 +124,17 @@ for i1 = 1:lengthSub
     end
     
     % Attempt to perform sleep analysis
+    subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
     try
-        [sleepData.ActualSleep(i1),sleepData.ActualSleepPercent(i1),...
-            sleepData.ActualWake(i1),sleepData.ActualWakePercent(i1),...
-            sleepData.SleepEfficiency(i1),sleepData.Latency(i1),...
-            sleepData.SleepBouts(i1),sleepData.WakeBouts(i1),...
-            sleepData.MeanSleepBout(i1),sleepData.MeanWakeBout(i1)] = ...
-            AnalyzeFile(aTime,PIM,BedTime,WakeTime);
+        [sleepData.ActualSleep{i1},sleepData.ActualSleepPercent{i1},...
+            sleepData.ActualWake{i1},sleepData.ActualWakePercent{i1},...
+            sleepData.SleepEfficiency{i1},sleepData.Latency{i1},...
+            sleepData.SleepBouts{i1},sleepData.WakeBouts{i1},...
+            sleepData.MeanSleepBout{i1},sleepData.MeanWakeBout{i1}] = ...
+            AnalyzeFile(aTime,PIM,subLog.bedtime,subLog.getuptime,true);
         
         dt = etime(datevec(aTime(2)),datevec(aTime(1)));
-        [sleepData.actiIS(i1),sleepData.actiIV(i1)] = IS_IVcalc(PIM,dt);
+        [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
     catch err
         reportError(header,err.message,saveDir);
     end
@@ -141,7 +144,8 @@ end
 outputFile = fullfile(saveDir,['output_',datestr(now,'yy-mm-dd'),'.mat']);
 save(outputFile,'phasorData','sleepData');
 % Convert to Excel
-organizeExcel(phasorData);
+phasorFile = fullfile(saveDir,['phasor_',datestr(now,'yy-mm-dd'),'.xlsx']);
+organizeExcel(phasorData,phasorFile);
 
 %% Turn warnings back on
 warning(s2);

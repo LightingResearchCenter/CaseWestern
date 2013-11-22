@@ -1,4 +1,4 @@
-function organizeExcel(phasorData)
+function organizeExcel(phasorData,saveFile)
 %ORGANIZEEXCEL Organize input data and save to Excel
 %   Format for Mariana
 
