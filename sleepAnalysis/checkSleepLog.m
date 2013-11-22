@@ -32,7 +32,7 @@ for i1 = 1:nDays
     else % too many possible bed times
         error('Multiple bed times for 1 day not allowed.');
     end
-    % check for a bed time
+    % check for a get up time
     upIdx = sleepLog.getuptime >= dayStart & sleepLog.getuptime < dayStop;
     if sum(upIdx) == 0 % no valid bed time found
         datasetout.getuptime(i1) = createGetUpTime(dTime(dayIdx),AI(dayIdx));% create a bed time
@@ -41,6 +41,10 @@ for i1 = 1:nDays
         datasetout.getuplog(i1) = true;
     else % too many possible bed times
         error('Multiple get up times for 1 day not allowed.');
+    end
+    % check that get up time occurs after bed time
+    if datasetout.getuptime(i1) < datasetout.bedtime(i1)
+        error('Bed time is after get up time');
     end
 end
 
