@@ -19,7 +19,8 @@ PIMts = resample(PIMts,dTime);
 PIMrs = PIMts.Data;
 
 % Remove excess data and not a number values
-idx3 = isnan(PIMrs) | dTime < startTime | dTime > stopTime;
+idx3a = isnan(PIMrs) | dTime < startTime | dTime > stopTime;
+idx3b = aTime < startTime | aTime > stopTime;
 % Remove specified sections if any
 if (~isnan(rmStart))
     idx4a = dTime >= rmStart & dTime <= rmStop;
@@ -28,10 +29,11 @@ else
     idx4a = false(numel(dTime),1);
     idx4b = false(numel(aTime),1);
 end
-idx5a = ~(idx3 | idx4a);
+idx5a = ~(idx3a | idx4a);
+idx5b = ~(idx3b | idx4b);
 dTime = dTime(idx5a);
-aTime = aTime(~idx4b);
-PIM = PIM(~idx4b);
+aTime = aTime(idx5b);
+PIM = PIM(idx5b);
 PIM2 = PIMrs(idx5a);
 AI = AI(idx5a);
 CS = CS(idx5a);
