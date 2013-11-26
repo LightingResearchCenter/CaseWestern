@@ -94,24 +94,24 @@ for i1 = 1:lengthSub
     end
     
     % Check if Actiwatch file path is listed and exists
-    if isempty(actiPath{i1,1}) || (exist(actiPath,'file') ~= 2)
-        if exist(actiPath,'file') ~= 2
+    if isempty(actiPath{i1,1}) || (exist(actiPath{i1,1},'file') ~= 2)
+        if exist(actiPath{i1,1},'file') ~= 2
             reportError(header,...
-                ['Actiwatch file does not exist. File: ',actiPath],...
+                ['Actiwatch file does not exist. File: ',actiPath{i1,1}],...
                 saveDir);
         end
         continue;
     end
     % Check if Daysimeter file path is listed and exists
-    if isempty(daysimPath{i1,1}) || (exist(daysimPath,'file') ~= 2)
-        if exist(daysimPath,'file') ~= 2
+    if isempty(daysimPath{i1,1}) || (exist(daysimPath{i1,1},'file') ~= 2)
+        if exist(daysimPath{i1,1},'file') ~= 2
             reportError(header,...
-                ['Daysimeter file does not exist. File: ',daysimPath],...
+                ['Daysimeter file does not exist. File: ',daysimPath{i1,1}],...
                 saveDir);
         end
         % Import just the Actiwatch data
         % Create CDF file name
-        CDFactiPath = regexprep(actiPath,'\.csv','.cdf');
+        CDFactiPath = regexprep(actiPath{i1,1},'\.csv','.cdf');
         % Check if CDF versions exist
         if exist(CDFactiPath,'file') == 2 % CDF Actiwatch file exists
             actiData = ProcessCDF(CDFactiPath);
@@ -119,7 +119,7 @@ for i1 = 1:lengthSub
             PIM = actiData.Variables.Activity;
         else % CDF Actiwatch file does not exist
             % Reads the data from the actiwatch data file
-            [aTime,PIM] = importActiwatch(actiPath);
+            [aTime,PIM] = importActiwatch(actiPath{i1,1});
             % Create a CDF version
             WriteActiwatchCDF(CDFactiPath,aTime,PIM);
         end
