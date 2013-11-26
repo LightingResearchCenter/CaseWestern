@@ -7,7 +7,7 @@ s1 = warning('off','MATLAB:linearinter:noextrap');
 s2 = warning('off','MATLAB:xlswrite:AddSheet');
 
 %% Enable paths to required subfunctions
-addpath('phasorAnalysis','sleepAnalysis');
+addpath('phasorAnalysis','sleepAnalysis','IO','CDF');
 
 %% File handling
 caseWesternHome = fullfile([filesep,filesep],'root','projects',...
@@ -93,18 +93,64 @@ for i1 = 1:lengthSub
         sleepData.season{i1} = 'summer';
     end
     
-    % Check if file paths are listed
-    if isempty(actiPath{i1,1}) || isempty(daysimPath{i1,1})
+    % Check if Actiwatch file path is listed and exists
+    if isempty(actiPath{i1,1}) || (exist(actiPath,'file') ~= 2)
+        if exist(actiPath,'file') ~= 2
+            reportError(header,...
+                ['Actiwatch file does not exist. File: ',actiPath],...
+                saveDir);
+        end
         continue;
     end
-    
-    % Attempt to import the data
-    try
-        [aTime,PIM,dTime,CS,AI] = ...
-            importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
-    catch err
-        reportError( header, err.message, saveDir );
+    % Check if Daysimeter file path is listed and exists
+    if isempty(daysimPath{i1,1}) || (exist(daysimPath,'file') ~= 2)
+        if exist(daysimPath,'file') ~= 2
+            reportError(header,...
+                ['Daysimeter file does not exist. File: ',daysimPath],...
+                saveDir);
+        end
+        % Import just the Actiwatch data
+        % Create CDF file name
+        CDFactiPath = regexprep(actiPath,'\.csv','.cdf');
+        % Check if CDF versions exist
+        if exist(CDFactiPath,'file') == 2 % CDF Actiwatch file exists
+            actiData = ProcessCDF(CDFactiPath);
+            aTime = actiData.Variables.Time;
+            PIM = actiData.Variables.Activity;
+        else % CDF Actiwatch file does not exist
+            % Reads the data from the actiwatch data file
+            [aTime,PIM] = importActiwatch(actiPath);
+            % Create a CDF version
+            WriteActiwatchCDF(CDFactiPath,aTime,PIM);
+        end
+        clear('actiData');
+        [aTime,PIM] = cropData(aTime,PIM,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
+        % Attempt to perform sleep analysis
+        subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
+        try
+            [sleepData.ActualSleep{i1},sleepData.ActualSleepPercent{i1},...
+                sleepData.ActualWake{i1},sleepData.ActualWakePercent{i1},...
+                sleepData.SleepEfficiency{i1},sleepData.Latency{i1},...
+                sleepData.SleepBouts{i1},sleepData.WakeBouts{i1},...
+                sleepData.MeanSleepBout{i1},sleepData.MeanWakeBout{i1}] = ...
+                AnalyzeFile(aTime,PIM,subLog.bedtime,subLog.getuptime,true);
+
+            dt = etime(datevec(aTime(2)),datevec(aTime(1)));
+            [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
+        catch err
+            reportError(header,err.message,saveDir);
+        end
+        
         continue;
+    else
+        % Attempt to import the data
+        try
+            [aTime,PIM,dTime,CS,AI] = ...
+                importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
+        catch err
+            reportError( header, err.message, saveDir );
+            continue;
+        end
     end
     
     % Resample and normalize Actiwatch data to Daysimeter data
