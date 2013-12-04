@@ -16,7 +16,7 @@ datasetout = dataset; % Create dataset array
 datasetout.bedtime = zeros(nDays,1);
 datasetout.bedlog = false(nDays,1);
 datasetout.getuptime = zeros(nDays,1);
-datasetout.uplog = false(nDays,1);
+datasetout.getuplog = false(nDays,1);
 
 for i1 = 1:nDays
     dayStart = days(i1);
