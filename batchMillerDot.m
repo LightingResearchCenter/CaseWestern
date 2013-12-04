@@ -21,6 +21,9 @@ workbookFile = fullfile(workbookPath,workbookName);
 savePath = uigetdir(fullfile(workbookPath,'Analysis','millerDots'),...
     'Select an output location');
 
+errorPath = fullfile(saveDir,['miller_dot_error_log_',...
+    datestr(now,'yyyy-mm-dd_HH-MM'),'.txt']);
+
 %% Perform vectorized calculations
 
 % Set start and stop times for analysis
@@ -78,7 +81,7 @@ for i1 = 1:lengthSub
     % Checks if there is a listed actiwatch file for the subject and if
     % there is not it moves to the next subject
     if (isempty(actiPath(i1)) == 1)
-        reportError( errorTitle, 'No actiwatch data available', savePath );
+        reportError( errorTitle, 'No actiwatch data available', errorPath );
         continue;
     end
     % Check if actiwatch file exists
@@ -91,14 +94,14 @@ for i1 = 1:lengthSub
     try
         [aTime, PIM] = importActiwatch(actiPath{i1});
     catch err
-        reportError( errorTitle, err.message, savePath );
+        reportError( errorTitle, err.message, errorPath );
         continue;
     end
     % Reads the data from the dimesimeter data file
     try
         [dTime, CS, AI] = importDime(dimePath{i1, 1},dimeSN(i1));
     catch err
-        reportError( errorTitle, err.message, savePath );
+        reportError( errorTitle, err.message, errorPath );
         continue;
     end
 

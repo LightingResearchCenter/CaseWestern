@@ -3,7 +3,7 @@ function [] = reportError( title, error, savePath )
 %   is skipped, the Subject number and intervention number will
 %	be output to a file in the results folder
 
-	fid = fopen( fullfile( savePath, 'Error Report.txt' ), 'a' );
+	fid = fopen(savePath,'a');
 	fprintf( fid, '\r\n %s: %s', title, error );
 	fclose( fid );
 

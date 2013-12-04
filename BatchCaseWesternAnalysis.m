@@ -2,6 +2,9 @@ function BatchCaseWesternAnalysis
 %CASEWESTERNANALYSIS Desciption goes here
 %   Detailed description goes here
 
+% Mark time of analysis
+runTime = now;
+
 %% Trun warning off
 s1 = warning('off','MATLAB:linearinter:noextrap');
 s2 = warning('off','MATLAB:xlswrite:AddSheet');
@@ -22,10 +25,12 @@ sleepLog = importSleepLog(sleepLogPath);
 
 % Set an output location
 saveDir = fullfile(caseWesternHome,'Analysis');
+errorPath = fullfile(saveDir,['error_log_',...
+    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.txt']);
 
 %% Creates a text file that records any errors in the data in the same path
 % as the results
-fid = fopen( fullfile( saveDir, 'Error Report.txt' ), 'w' );
+fid = fopen(errorPath,'w');
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
@@ -98,7 +103,7 @@ for i1 = 1:lengthSub
         if exist(actiPath{i1,1},'file') ~= 2
             reportError(header,...
                 ['Actiwatch file does not exist. File: ',actiPath{i1,1}],...
-                saveDir);
+                errorPath);
         end
         continue;
     end
@@ -107,7 +112,7 @@ for i1 = 1:lengthSub
         if exist(daysimPath{i1,1},'file') ~= 2
             reportError(header,...
                 ['Daysimeter file does not exist. File: ',daysimPath{i1,1}],...
-                saveDir);
+                errorPath);
         end
         % Import just the Actiwatch data
         % Create CDF file name
@@ -129,7 +134,7 @@ for i1 = 1:lengthSub
         try
             subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
         catch err
-            reportError(header,err.message,saveDir);
+            reportError(header,err.message,errorPath);
         end
         
         try
@@ -143,7 +148,7 @@ for i1 = 1:lengthSub
             dt = etime(datevec(aTime(2)),datevec(aTime(1)));
             [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
         catch err
-            reportError(header,err.message,saveDir);
+            reportError(header,err.message,errorPath);
         end
         
         continue;
@@ -153,7 +158,7 @@ for i1 = 1:lengthSub
             [aTime,PIM,dTime,CS,AI] = ...
                 importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
         catch err
-            reportError( header, err.message, saveDir );
+            reportError(header,err.message,errorPath);
             continue;
         end
     end
@@ -171,14 +176,14 @@ for i1 = 1:lengthSub
             phasorData.magnitudeFirstHarmonic(i1)] =...
             phasorAnalysis(dTime,CS,AI);
     catch err
-            reportError(header,err.message,saveDir);
+            reportError(header,err.message,errorPath);
     end
     
     % Attempt to perform sleep analysis
     try
         subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
     catch err
-        reportError(header,err.message,saveDir);
+        reportError(header,err.message,errorPath);
     end
     
     try
@@ -192,17 +197,20 @@ for i1 = 1:lengthSub
         dt = etime(datevec(aTime(2)),datevec(aTime(1)));
         [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
     catch err
-        reportError(header,err.message,saveDir);
+        reportError(header,err.message,errorPath);
     end
 end
 
 %% Save output
-outputFile = fullfile(saveDir,['output_',datestr(now,'yy-mm-dd'),'.mat']);
+outputFile = fullfile(saveDir,['output_',...
+    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.mat']);
 save(outputFile,'phasorData','sleepData');
 % Convert to Excel
-phasorFile = fullfile(saveDir,['phasor_',datestr(now,'yy-mm-dd'),'.xlsx']);
+phasorFile = fullfile(saveDir,['phasor_',...
+    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.xlsx']);
 organizeExcel(phasorData,phasorFile);
-sleepFile = fullfile(saveDir,['sleep_',datestr(now,'yy-mm-dd'),'.xlsx']);
+sleepFile = fullfile(saveDir,['sleep_',...
+    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.xlsx']);
 organizeSleepExcel(sleepData,sleepFile);
 
 %% Turn warnings back on

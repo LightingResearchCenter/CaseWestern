@@ -18,11 +18,14 @@ workbookFile = fullfile(caseWesternHome,'index.xlsx');
 
 % Select an output location
 username = getenv('USERNAME');
-saveDir = uigetdir(fullfile('C:','Users',username,'Desktop'),'Select location to save output.');
+saveDir = uigetdir(fullfile('C:','Users',username,'Desktop'),...
+    'Select location to save output.');
+errorPath = fullfile(saveDir,['checkCSAI_error_log_',...
+    datestr(now,'yyyy-mm-dd_HH-MM'),'.txt']);
 
 %% Creates a text file that records any errors in the data in the same path
 %as the results
-fid = fopen( fullfile( saveDir, 'Error Report.txt' ), 'w' );
+fid = fopen( errorPath, 'w' );
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
@@ -71,7 +74,7 @@ for i1 = index1(logical1)
         [aTime,PIM,dTime,CS,AI] = ...
             importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
     catch err
-        reportError( header, err.message, saveDir );
+        reportError( header, err.message, errorPath );
         continue;
     end
     
@@ -92,7 +95,7 @@ for i1 = index1(logical1)
             [datestr(startTime(i1)),' - ',datestr(stopTime(i1))]};
         plotCSAI(dTime, CS, AI, fig, figTitle, savePath);
     catch err
-            reportError( header, err.message, saveDir );
+            reportError( header, err.message, errorPath );
             continue;
     end
 end
