@@ -1,7 +1,7 @@
 function [ActualSleep,ActualSleepPercent,ActualWake,...
     ActualWakePercent,SleepEfficiency,Latency,SleepBouts,...
     WakeBouts,MeanSleepBout,MeanWakeBout] = ...
-    AnalyzeFile(Time,Activity,BedTime,WakeTime,average)
+    AnalyzeFile(Time,Activity,BedTime,WakeTime,average,errorPath)
 
 Days = length(BedTime);
 
@@ -27,7 +27,7 @@ for i = 1:Days
             MeanSleepBout{i},MeanWakeBout{i}] = ...
             CalcSleepParams(Activity,Time,BedTime(i),WakeTime(i));
     catch err
-        display(err);
+        reportError(header,err.message,errorPath);
     end
 end
 
