@@ -2,10 +2,7 @@ function SleepState = FindSleepState(Activity,Threshold)
 %SLEEPSTATE Calculate sleep state using LRC simple method
 
 % Make Activity array vertical if not already
-[y,x] = size(Activity);
-if x > y % The array is horizontal
-    Activity = Activity';
-end % The array is vertical
+Activity = Activity(:);
 
 % Calculate Sleep State 1 = sleeping 0 = not sleeping
 n = numel(Activity); %Find the number of data points
