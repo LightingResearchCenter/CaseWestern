@@ -2,9 +2,6 @@ function [aTime,PIM,dTime,CS,AI] = importData(actiPath,daysimPath,daysimSN)
 %IMPORTDATA Import data from Actiwatch and Daysimeter files
 %   Detailed description goes here
 
-%% Enable paths to required subfunctions
-addpath('IO','CDF');
-
 %% Check if files exist
 % Check if actiwatch file exists
 if exist(actiPath,'file') ~= 2
