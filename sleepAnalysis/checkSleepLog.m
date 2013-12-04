@@ -22,7 +22,7 @@ for i1 = 1:nDays
     dayStart = days(i1);
     dayStop = dayStart + 1;
     
-    dayIdx = dTime >= dayStart & dTime < dayStop;
+%     dayIdx = dTime >= dayStart & dTime < dayStop;
     % calculate bed and get up times in case needed
 %     [tempBedTime,tempGetUpTime] = createSleepLog(dTime(dayIdx),AI(dayIdx));
     % check for a bed time
