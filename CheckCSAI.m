@@ -20,8 +20,8 @@ workbookFile = fullfile(caseWesternHome,'index.xlsx');
 username = getenv('USERNAME');
 saveDir = uigetdir(fullfile('C:','Users',username,'Desktop'),...
     'Select location to save output.');
-errorPath = fullfile(saveDir,['checkCSAI_error_log_',...
-    datestr(now,'yyyy-mm-dd_HH-MM'),'.txt']);
+errorPath = fullfile(saveDir,[datestr(now,'yyyy-mm-dd_HH-MM'),...
+    '_checkCSAI_error_log.txt']);
 
 %% Creates a text file that records any errors in the data in the same path
 %as the results

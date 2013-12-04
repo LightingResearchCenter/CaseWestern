@@ -25,8 +25,8 @@ sleepLog = importSleepLog(sleepLogPath);
 
 % Set an output location
 saveDir = fullfile(caseWesternHome,'Analysis');
-errorPath = fullfile(saveDir,['error_log_',...
-    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.txt']);
+errorPath = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
+    '_error_log.txt']);
 
 %% Creates a text file that records any errors in the data in the same path
 % as the results
@@ -202,15 +202,15 @@ for i1 = 1:lengthSub
 end
 
 %% Save output
-outputFile = fullfile(saveDir,['output_',...
-    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.mat']);
+outputFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
+    '_output.mat']);
 save(outputFile,'phasorData','sleepData');
 % Convert to Excel
-phasorFile = fullfile(saveDir,['phasor_',...
-    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.xlsx']);
+phasorFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
+    '_phasor.xlsx']);
 organizeExcel(phasorData,phasorFile);
-sleepFile = fullfile(saveDir,['sleep_',...
-    datestr(runTime,'yyyy-mm-dd_HH-MM'),'.xlsx']);
+sleepFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
+    '_sleep.xlsx']);
 organizeSleepExcel(sleepData,sleepFile);
 
 %% Turn warnings back on

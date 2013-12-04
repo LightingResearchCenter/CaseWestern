@@ -21,8 +21,8 @@ workbookFile = fullfile(workbookPath,workbookName);
 savePath = uigetdir(fullfile(workbookPath,'Analysis','millerDots'),...
     'Select an output location');
 
-errorPath = fullfile(saveDir,['miller_dot_error_log_',...
-    datestr(now,'yyyy-mm-dd_HH-MM'),'.txt']);
+errorPath = fullfile(saveDir,[datestr(now,'yyyy-mm-dd_HH-MM'),...
+    '_miller_dot_error_log.txt']);
 
 %% Perform vectorized calculations
 
