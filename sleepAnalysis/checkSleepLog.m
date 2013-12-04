@@ -34,10 +34,11 @@ for i1 = 1:nDays
         datasetout.bedtime(i1) = sleepLog.bedtime(bedIdx);
         datasetout.bedlog(i1) = true;
     else % too many possible bed times
-        error('Multiple bed times for 1 day not allowed.');
+        error(['Multiple bed times for 1 day (',...
+            datestr(dayStart),' to ',datestr(dayStop),') not allowed.']);
     end
     % check for a get up time
-    upIdx = sleepLog.getuptime >= dayStart & sleepLog.getuptime < dayStop;
+    upIdx = sleepLog.getuptime >= dayStart + .5 & sleepLog.getuptime < dayStop + .5;
     if sum(upIdx) == 0 % no valid bed time found
         datasetout.getuptime(i1) = tempGetUpTime;% use artificial get up time
 %         datasetout.getuptime(i1) = floor(dayStop) + 7/24; % 7 AM
@@ -45,7 +46,8 @@ for i1 = 1:nDays
         datasetout.getuptime(i1) = sleepLog.getuptime(upIdx);
         datasetout.getuplog(i1) = true;
     else % too many possible bed times
-        error(['Multiple get up times for 1 day (',datestr(dayStart),') not allowed.']);
+        error(['Multiple get up times for 1 day (',...
+            datestr(dayStart),' to ',datestr(dayStop),') not allowed.']);
     end
     % check that get up time occurs after bed time
     if datasetout.getuptime(i1) < datasetout.bedtime(i1)
