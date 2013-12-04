@@ -206,10 +206,10 @@ for i1 = 1:lengthSub
         dt = etime(datevec(aTime(2)),datevec(aTime(1)));
         [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
         
-        sleepData.calcBedLogs{i1} = sum(subLog.bedlog);
-        sleepData.userBedLogs{i1} = numel(subLog.bedlog) - sleepData.calcBedLogs{i1};
-        sleepData.calcUpLogs{i1} = sum(subLog.getuplog);
-        sleepData.userUpLogs{i1} = numel(subLog.getuplog) - sleepData.calcUpLogs{i1};
+        sleepData.userBedLogs{i1} = sum(subLog.bedlog);
+        sleepData.calcBedLogs{i1} = numel(subLog.bedlog) - sleepData.userBedLogs{i1};
+        sleepData.userUpLogs{i1} = sum(subLog.getuplog);
+        sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
     catch err
         reportError(header,err.message,errorPath);
     end
