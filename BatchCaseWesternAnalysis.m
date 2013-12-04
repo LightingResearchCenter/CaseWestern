@@ -65,6 +65,10 @@ sleepData.MeanSleepBout = cell(lengthSub,1);
 sleepData.MeanWakeBout = cell(lengthSub,1);
 sleepData.actiIS = cell(lengthSub,1);
 sleepData.actiIV = cell(lengthSub,1);
+sleepData.userBedLogs = cell(lengthSub,1);
+sleepData.calcBedLogs = cell(lengthSub,1);
+sleepData.userUpLogs = cell(lengthSub,1);
+sleepData.calcUpLogs = cell(lengthSub,1);
 
 %% Perform vectorized calculations
 
@@ -147,6 +151,11 @@ for i1 = 1:lengthSub
 
             dt = etime(datevec(aTime(2)),datevec(aTime(1)));
             [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
+            
+            sleepData.calcBedLogs{i1} = sum(subLog.bedlog);
+            sleepData.userBedLogs{i1} = numel(subLog.bedlog) - sleepData.calcBedLogs{i1};
+            sleepData.calcUpLogs{i1} = sum(subLog.getuplog);
+            sleepData.userUpLogs{i1} = numel(subLog.getuplog) - sleepData.calcUpLogs{i1};
         catch err
             reportError(header,err.message,errorPath);
         end
@@ -196,6 +205,11 @@ for i1 = 1:lengthSub
         
         dt = etime(datevec(aTime(2)),datevec(aTime(1)));
         [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
+        
+        sleepData.calcBedLogs{i1} = sum(subLog.bedlog);
+        sleepData.userBedLogs{i1} = numel(subLog.bedlog) - sleepData.calcBedLogs{i1};
+        sleepData.calcUpLogs{i1} = sum(subLog.getuplog);
+        sleepData.userUpLogs{i1} = numel(subLog.getuplog) - sleepData.calcUpLogs{i1};
     catch err
         reportError(header,err.message,errorPath);
     end
