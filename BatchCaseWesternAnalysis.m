@@ -126,7 +126,12 @@ for i1 = 1:lengthSub
         clear('actiData');
         [aTime,PIM] = cropData(aTime,PIM,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
         % Attempt to perform sleep analysis
-        subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
+        try
+            subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
+        catch err
+            reportError(header,err.message,saveDir);
+        end
+        
         try
             [sleepData.ActualSleep{i1},sleepData.ActualSleepPercent{i1},...
                 sleepData.ActualWake{i1},sleepData.ActualWakePercent{i1},...
