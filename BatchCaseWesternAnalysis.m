@@ -5,12 +5,27 @@ function BatchCaseWesternAnalysis
 % Mark time of analysis
 runTime = now;
 
-%% Trun warning off
+%% Turn warning off
 s1 = warning('off','MATLAB:linearinter:noextrap');
 s2 = warning('off','MATLAB:xlswrite:AddSheet');
 
 %% Enable paths to required subfunctions
 addpath('phasorAnalysis','sleepAnalysis','IO','CDF');
+
+%% Ask user what sleep time to use
+sleepLogMode = menu('Select what sleep time mode to use','fixed','logs/dynamic');
+if sleepLogMode == 1
+    bedStr = input('Enter bed time (ex. 21:00): ','s');
+    bedTokens = regexp(bedStr,'^(\d{1,2}):(\d\d)','tokens');
+    fixedBedTime = str2double(bedTokens{1}{1})/24 + str2double(bedTokens{1}{2})/60/24;
+    
+    wakeStr = input('Enter wake time (ex. 07:00): ','s');
+    wakeTokens = regexp(wakeStr,'^(\d{1,2}):(\d\d)','tokens');
+    fixedWakeTime = str2double(wakeTokens{1}{1})/24 + str2double(wakeTokens{1}{2})/60/24;
+else
+    fixedBedTime = 0;
+    fixedWakeTime = 0;
+end
 
 %% File handling
 caseWesternHome = fullfile([filesep,filesep],'root','projects',...
@@ -136,7 +151,7 @@ for i1 = 1:lengthSub
         [aTime,PIM] = cropData(aTime,PIM,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
         % Attempt to perform sleep analysis
         try
-            subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
+            subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
         catch err
             reportError(header,err.message,errorPath);
         end
@@ -152,10 +167,12 @@ for i1 = 1:lengthSub
             dt = etime(datevec(aTime(2)),datevec(aTime(1)));
             [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
             
-            sleepData.calcBedLogs{i1} = sum(subLog.bedlog);
-            sleepData.userBedLogs{i1} = numel(subLog.bedlog) - sleepData.calcBedLogs{i1};
-            sleepData.calcUpLogs{i1} = sum(subLog.getuplog);
-            sleepData.userUpLogs{i1} = numel(subLog.getuplog) - sleepData.calcUpLogs{i1};
+            if sleepLogMode == 2
+                sleepData.userBedLogs{i1} = sum(subLog.bedlog);
+                sleepData.calcBedLogs{i1} = numel(subLog.bedlog) - sleepData.userBedLogs{i1};
+                sleepData.userUpLogs{i1} = sum(subLog.getuplog);
+                sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
+            end
         catch err
             reportError(header,err.message,errorPath);
         end
@@ -190,7 +207,7 @@ for i1 = 1:lengthSub
     
     % Attempt to perform sleep analysis
     try
-        subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI);
+        subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
     catch err
         reportError(header,err.message,errorPath);
     end
@@ -205,11 +222,12 @@ for i1 = 1:lengthSub
         
         dt = etime(datevec(aTime(2)),datevec(aTime(1)));
         [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
-        
-        sleepData.userBedLogs{i1} = sum(subLog.bedlog);
-        sleepData.calcBedLogs{i1} = numel(subLog.bedlog) - sleepData.userBedLogs{i1};
-        sleepData.userUpLogs{i1} = sum(subLog.getuplog);
-        sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
+        if sleepLogMode == 2
+            sleepData.userBedLogs{i1} = sum(subLog.bedlog);
+            sleepData.calcBedLogs{i1} = numel(subLog.bedlog) - sleepData.userBedLogs{i1};
+            sleepData.userUpLogs{i1} = sum(subLog.getuplog);
+            sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
+        end
     catch err
         reportError(header,err.message,errorPath);
     end
