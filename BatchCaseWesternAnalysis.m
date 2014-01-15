@@ -60,41 +60,52 @@ fid = fopen(errorPath,'w');
 fprintf( fid, 'Error Report \r\n' );
 fclose( fid );
 
-%% Preallocate variables
-lengthSub = length(subject);
-% Preallocate phasor struct
-phasorData = dataset;
-phasorData.subject = subject;
-phasorData.week = week;
-phasorData.phasorMagnitude = zeros(lengthSub,1);
-phasorData.phasorAngle = zeros(lengthSub,1);
-phasorData.IS = zeros(lengthSub,1);
-phasorData.IV = zeros(lengthSub,1);
-phasorData.meanCS = zeros(lengthSub,1);
-phasorData.magnitudeWithHarmonics = zeros(lengthSub,1);
-phasorData.magnitudeFirstHarmonic = zeros(lengthSub,1);
-phasorData.season = cell(lengthSub,1);
-% Preallocate sleep struct
-sleepData = dataset;
-sleepData.subject = subject;
-sleepData.week = week;
-sleepData.season = cell(lengthSub,1);
-sleepData.ActualSleep = cell(lengthSub,1);
-sleepData.ActualSleepPercent = cell(lengthSub,1);
-sleepData.ActualWake = cell(lengthSub,1);
-sleepData.ActualWakePercent = cell(lengthSub,1);
-sleepData.SleepEfficiency = cell(lengthSub,1);
-sleepData.Latency = cell(lengthSub,1);
-sleepData.SleepBouts = cell(lengthSub,1);
-sleepData.WakeBouts = cell(lengthSub,1);
-sleepData.MeanSleepBout = cell(lengthSub,1);
-sleepData.MeanWakeBout = cell(lengthSub,1);
-sleepData.actiIS = cell(lengthSub,1);
-sleepData.actiIV = cell(lengthSub,1);
-sleepData.userBedLogs = cell(lengthSub,1);
-sleepData.calcBedLogs = cell(lengthSub,1);
-sleepData.userUpLogs = cell(lengthSub,1);
-sleepData.calcUpLogs = cell(lengthSub,1);
+%% Preallocate result variables
+numSub = numel(subject);
+results = dataset;
+results.subject = subject;
+results.repeatSubject = cell(numSub,1);
+results.excludeRepeat = cell(numSub,1);
+results.week = week;
+results.season = cell(numSub,1);
+
+% Preallocate phasor results
+results.phasorMagnitude = cell(numSub,1);
+results.phasorAngle = cell(numSub,1);
+results.IS = cell(numSub,1);
+results.IV = cell(numSub,1);
+results.meanCS = cell(numSub,1);
+results.magnitudeWithHarmonics = cell(numSub,1);
+results.magnitudeFirstHarmonic = cell(numSub,1);
+
+% Preallocate sleep results
+results.ActualSleep = cell(numSub,1);
+results.ActualSleepPercent = cell(numSub,1);
+results.ActualWake = cell(numSub,1);
+results.ActualWakePercent = cell(numSub,1);
+results.SleepEfficiency = cell(numSub,1);
+results.Latency = cell(numSub,1);
+results.SleepBouts = cell(numSub,1);
+results.WakeBouts = cell(numSub,1);
+results.MeanSleepBout = cell(numSub,1);
+results.MeanWakeBout = cell(numSub,1);
+results.actiIS = cell(numSub,1);
+results.actiIV = cell(numSub,1);
+if sleepLogMode == 2
+    results.userBedLogs = cell(numSub,1);
+    results.calcBedLogs = cell(numSub,1);
+    results.userUpLogs = cell(numSub,1);
+    results.calcUpLogs = cell(numSub,1);
+end
+
+%% Specify repeat subjects and which ones to be excluded
+repeats1  = [13,22,30,38,42,44,47,48,60,64]; % Subject on first run
+repeats2  = [35,41,55,54,53,58,62,61,69,67]; % Subject on second run
+repeatsEx = [35,41,42,47,48,54,55,58,67,69]; % Subjects to be excluded
+% include caregiver subject numbers
+repeats1  = [repeats1,repeats1+.1];
+repeats2  = [repeats2,repeats2+.1];
+repeatsEx = [repeatsEx,repeatsEx+.1];
 
 %% Perform vectorized calculations
 
@@ -104,31 +115,40 @@ daysimStart(isnan(daysimStart)) = 0;
 startTime = max([actiStart,daysimStart],[],2);
 stopTime = startTime + days;
 
-% Determine the season
+% Determine the month
 monthStr = datestr(startTime,'mm');
 monthCell =  mat2cell(monthStr,ones(length(monthStr),1));
 month = str2double(monthCell);
-idxSeason = month < 3 | month >= 11; % true = winter, false = summer
 
 %% Begin main loop
 reverseStr = '';
-for i1 = 1:lengthSub
-    % Creates a header title with information about the loop
+for i1 = 1:numSub
+    % Creates an iteration title with information about the loop
     iteration = sprintf('Subject: %4.1f  Week: %i  Iteration: %3i of %3i',...
-        subject(i1),week(i1),i1,lengthSub);
+        subject(i1),week(i1),i1,numSub);
     disp([reverseStr,iteration]);
     reverseStr = repmat(sprintf('\b'), 1, numel(iteration)+1);
     
     % Assign a text value for season
-    if idxSeason(i1)
-        phasorData.season{i1} = 'winter';
-        sleepData.season{i1} = 'winter';
+    if month(i1) < 3 || month(i1) >= 11
+        results.season{i1} = 'winter';
     else
-        phasorData.season{i1} = 'summer';
-        sleepData.season{i1} = 'summer';
+        results.season{i1} = 'summer';
     end
     
-    % Check if Actiwatch file path is listed and exists
+    % Check if the subject is a repeat
+    if any(subject(i1) == repeats1)
+        results.repeatSubject{i1} = repeats2(subject(i1) == repeats1);
+    elseif any(subject(i1) == repeats2)
+        results.repeatSubject{i1} = repeats1(subject(i1) == repeats2);
+    end
+    if any(subject(i1) == repeatsEx)
+        results.excludeRepeat{i1} = 'true';
+    else
+        results.excludeRepeat{i1} = 'false';
+    end
+    
+    %% Check if Actiwatch file path is listed and exists
     if isempty(actiPath{i1,1}) || (exist(actiPath{i1,1},'file') ~= 2)
         if exist(actiPath{i1,1},'file') ~= 2
             reportError(iteration,...
@@ -136,15 +156,8 @@ for i1 = 1:lengthSub
                 errorPath);
         end
         continue;
-    end
-    % Check if Daysimeter file path is listed and exists
-    if isempty(daysimPath{i1,1}) || (exist(daysimPath{i1,1},'file') ~= 2)
-        if exist(daysimPath{i1,1},'file') ~= 2
-            reportError(iteration,...
-                ['Daysimeter file does not exist. File: ',daysimPath{i1,1}],...
-                errorPath);
-        end
-        % Import just the Actiwatch data
+    else
+        % Import the actiwatch data
         % Create CDF file name
         CDFactiPath = regexprep(actiPath{i1,1},'\.csv','.cdf');
         % Check if CDF versions exist
@@ -158,90 +171,79 @@ for i1 = 1:lengthSub
             % Create a CDF version
             WriteActiwatchCDF(CDFactiPath,aTime,PIM);
         end
-        clear('actiData');
         [aTime,PIM] = cropData(aTime,PIM,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
-        % Attempt to perform sleep analysis
+
+        %% Attempt to perform sleep analysis
         try
             subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
         catch err
             reportError(iteration,err.message,errorPath);
         end
-        
+
         try
-            [sleepData.ActualSleep{i1},sleepData.ActualSleepPercent{i1},...
-                sleepData.ActualWake{i1},sleepData.ActualWakePercent{i1},...
-                sleepData.SleepEfficiency{i1},sleepData.Latency{i1},...
-                sleepData.SleepBouts{i1},sleepData.WakeBouts{i1},...
-                sleepData.MeanSleepBout{i1},sleepData.MeanWakeBout{i1}] = ...
+            [results.ActualSleep{i1},results.ActualSleepPercent{i1},...
+                results.ActualWake{i1},results.ActualWakePercent{i1},...
+                results.SleepEfficiency{i1},results.Latency{i1},...
+                results.SleepBouts{i1},results.WakeBouts{i1},...
+                results.MeanSleepBout{i1},results.MeanWakeBout{i1}] = ...
                 AnalyzeFile(aTime,PIM,subLog.bedtime,subLog.getuptime,true);
 
             dt = etime(datevec(aTime(2)),datevec(aTime(1)));
-            [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
-            
+            [results.actiIS{i1},results.actiIV{i1}] = IS_IVcalc(PIM,dt);
+
             if sleepLogMode == 2
-                sleepData.userBedLogs{i1} = sum(subLog.bedlog);
-                sleepData.calcBedLogs{i1} = numel(subLog.bedlog) - sleepData.userBedLogs{i1};
-                sleepData.userUpLogs{i1} = sum(subLog.getuplog);
-                sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
+                results.userBedLogs{i1} = sum(subLog.bedlog);
+                results.calcBedLogs{i1} = numel(subLog.bedlog) - results.userBedLogs{i1};
+                results.userUpLogs{i1} = sum(subLog.getuplog);
+                results.calcUpLogs{i1} = numel(subLog.getuplog) - results.userUpLogs{i1};
             end
         catch err
             reportError(iteration,err.message,errorPath);
         end
-        
+    end
+    
+    %% Check if Daysimeter file path is listed and exists
+    if isempty(daysimPath{i1,1}) || (exist(daysimPath{i1,1},'file') ~= 2)
+        if exist(daysimPath{i1,1},'file') ~= 2
+            reportError(iteration,...
+                ['Daysimeter file does not exist. File: ',daysimPath{i1,1}],...
+                errorPath);
+        end
         continue;
     else
-        % Attempt to import the data
+        % Import the Daysimeter data
+        % Create CDF file name
+        CDFdaysimPath = regexprep(daysimPath{i1,1},'\.txt','.cdf');
+        % Check if CDF versions exist
+        if exist(CDFdaysimPath,'file') == 2 % CDF Daysimeter file exists
+            daysimData = ProcessCDF(CDFdaysimPath);
+            dTime = daysimData.Variables.Time;
+            CS = daysimData.Variables.CS;
+            AI = daysimData.Variables.Activity;
+        else % CDF Actiwatch file does not exist
+            % Reads the data from the dimesimeter data file
+            [dTime,lux,CLA,CS,AI] = importDime(daysimPath{i1,1},daysimSN(i1));
+            % Create a CDF version
+            WriteDaysimeterCDF(CDFdaysimPath,dTime,lux,CLA,CS,AI);
+        end
+    
+        % Resample and normalize Actiwatch data to Daysimeter data
+        [dTime,CS,AI,aTime,PIM] = ...
+            combineData(aTime,PIM,dTime,CS,AI,...
+            startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
+
+        % Attempt to perform phasor analysis on the combined data
         try
-            [aTime,PIM,dTime,CS,AI] = ...
-                importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
+            [results.phasorMagnitude{i1},results.phasorAngle{i1},...
+                results.IS{i1},results.IV{i1},results.meanCS{i1},...
+                results.magnitudeWithHarmonics{i1},...
+                results.magnitudeFirstHarmonic{i1}] =...
+                phasorAnalysis(dTime,CS,AI);
         catch err
-            reportError(iteration,err.message,errorPath);
-            continue;
+                reportError(iteration,err.message,errorPath);
         end
     end
     
-    % Resample and normalize Actiwatch data to Daysimeter data
-    [dTime,CS,AI,aTime,PIM] = ...
-        combineData(aTime,PIM,dTime,CS,AI,...
-        startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
-    
-    % Attempt to perform phasor analysis on the combined data
-    try
-        [phasorData.phasorMagnitude(i1),phasorData.phasorAngle(i1),...
-            phasorData.IS(i1),phasorData.IV(i1),phasorData.meanCS(i1),...
-            phasorData.magnitudeWithHarmonics(i1),...
-            phasorData.magnitudeFirstHarmonic(i1)] =...
-            phasorAnalysis(dTime,CS,AI);
-    catch err
-            reportError(iteration,err.message,errorPath);
-    end
-    
-    % Attempt to perform sleep analysis
-    try
-        subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
-    catch err
-        reportError(iteration,err.message,errorPath);
-    end
-    
-    try
-        [sleepData.ActualSleep{i1},sleepData.ActualSleepPercent{i1},...
-            sleepData.ActualWake{i1},sleepData.ActualWakePercent{i1},...
-            sleepData.SleepEfficiency{i1},sleepData.Latency{i1},...
-            sleepData.SleepBouts{i1},sleepData.WakeBouts{i1},...
-            sleepData.MeanSleepBout{i1},sleepData.MeanWakeBout{i1}] = ...
-            AnalyzeFile(aTime,PIM,subLog.bedtime,subLog.getuptime,true,errorPath);
-        
-        dt = etime(datevec(aTime(2)),datevec(aTime(1)));
-        [sleepData.actiIS{i1},sleepData.actiIV{i1}] = IS_IVcalc(PIM,dt);
-        if sleepLogMode == 2
-            sleepData.userBedLogs{i1} = sum(subLog.bedlog);
-            sleepData.calcBedLogs{i1} = numel(subLog.bedlog) - sleepData.userBedLogs{i1};
-            sleepData.userUpLogs{i1} = sum(subLog.getuplog);
-            sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
-        end
-    catch err
-        reportError(iteration,err.message,errorPath);
-    end
 end
 
 %% Update displayed message
@@ -252,14 +254,11 @@ reverseStr = repmat(sprintf('\b'), 1, numel(msg)+1);
 %% Save output
 outputFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
     '_output',suffix,'.mat']);
-save(outputFile,'phasorData','sleepData');
+save(outputFile,'results');
 % Convert to Excel
-phasorFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_phasor',suffix,'.xlsx']);
-organizeExcel(phasorData,phasorFile);
-sleepFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_sleep',suffix,'.xlsx']);
-organizeSleepExcel(sleepData,sleepFile);
+excelFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
+    '_results',suffix,'.xlsx']);
+organizeResultsExcel(results,excelFile);
 
 %% Turn warnings back on
 warning(s2);
