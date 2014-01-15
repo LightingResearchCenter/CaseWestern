@@ -111,13 +111,13 @@ month = str2double(monthCell);
 idxSeason = month < 3 | month >= 11; % true = winter, false = summer
 
 %% Begin main loop
+reverseStr = '';
 for i1 = 1:lengthSub
     % Creates a header title with information about the loop
-    header = ['Subject: ',num2str(subject(i1)),...
-              ' Week: ',num2str(week(i1)),...
-              ' Iteration: ',num2str(i1),...
-              ' of ',num2str(lengthSub)];
-    disp(header);
+    iteration = sprintf('Subject: %4.1f  Week: %i  Iteration: %3i of %3i',...
+        subject(i1),week(i1),i1,lengthSub);
+    disp([reverseStr,iteration]);
+    reverseStr = repmat(sprintf('\b'), 1, numel(iteration)+1);
     
     % Assign a text value for season
     if idxSeason(i1)
@@ -131,7 +131,7 @@ for i1 = 1:lengthSub
     % Check if Actiwatch file path is listed and exists
     if isempty(actiPath{i1,1}) || (exist(actiPath{i1,1},'file') ~= 2)
         if exist(actiPath{i1,1},'file') ~= 2
-            reportError(header,...
+            reportError(iteration,...
                 ['Actiwatch file does not exist. File: ',actiPath{i1,1}],...
                 errorPath);
         end
@@ -140,7 +140,7 @@ for i1 = 1:lengthSub
     % Check if Daysimeter file path is listed and exists
     if isempty(daysimPath{i1,1}) || (exist(daysimPath{i1,1},'file') ~= 2)
         if exist(daysimPath{i1,1},'file') ~= 2
-            reportError(header,...
+            reportError(iteration,...
                 ['Daysimeter file does not exist. File: ',daysimPath{i1,1}],...
                 errorPath);
         end
@@ -164,7 +164,7 @@ for i1 = 1:lengthSub
         try
             subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
         catch err
-            reportError(header,err.message,errorPath);
+            reportError(iteration,err.message,errorPath);
         end
         
         try
@@ -185,7 +185,7 @@ for i1 = 1:lengthSub
                 sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
             end
         catch err
-            reportError(header,err.message,errorPath);
+            reportError(iteration,err.message,errorPath);
         end
         
         continue;
@@ -195,7 +195,7 @@ for i1 = 1:lengthSub
             [aTime,PIM,dTime,CS,AI] = ...
                 importData(actiPath{i1,1},daysimPath{i1,1},daysimSN(i1));
         catch err
-            reportError(header,err.message,errorPath);
+            reportError(iteration,err.message,errorPath);
             continue;
         end
     end
@@ -213,14 +213,14 @@ for i1 = 1:lengthSub
             phasorData.magnitudeFirstHarmonic(i1)] =...
             phasorAnalysis(dTime,CS,AI);
     catch err
-            reportError(header,err.message,errorPath);
+            reportError(iteration,err.message,errorPath);
     end
     
     % Attempt to perform sleep analysis
     try
         subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
     catch err
-        reportError(header,err.message,errorPath);
+        reportError(iteration,err.message,errorPath);
     end
     
     try
@@ -240,9 +240,14 @@ for i1 = 1:lengthSub
             sleepData.calcUpLogs{i1} = numel(subLog.getuplog) - sleepData.userUpLogs{i1};
         end
     catch err
-        reportError(header,err.message,errorPath);
+        reportError(iteration,err.message,errorPath);
     end
 end
+
+%% Update displayed message
+msg = 'Analysis complete. Saving results to files.';
+disp([reverseStr,msg]);
+reverseStr = repmat(sprintf('\b'), 1, numel(msg)+1);
 
 %% Save output
 outputFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
@@ -259,4 +264,8 @@ organizeSleepExcel(sleepData,sleepFile);
 %% Turn warnings back on
 warning(s2);
 warning(s1);
+
+%% Update displayed message
+msg = 'Results saved to file. Program has completed.';
+disp([reverseStr,msg]);
 end
