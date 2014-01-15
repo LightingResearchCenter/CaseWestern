@@ -17,14 +17,25 @@ sleepLogMode = menu('Select what sleep time mode to use','fixed','logs/dynamic')
 if sleepLogMode == 1
     bedStr = input('Enter bed time (ex. 21:00): ','s');
     bedTokens = regexp(bedStr,'^(\d{1,2}):(\d\d)','tokens');
-    fixedBedTime = str2double(bedTokens{1}{1})/24 + str2double(bedTokens{1}{2})/60/24;
+    bedHour = str2double(bedTokens{1}{1});
+    bedMinute = str2double(bedTokens{1}{2});
+    fixedBedTime = bedHour/24 + bedMinute/60/24;
     
     wakeStr = input('Enter wake time (ex. 07:00): ','s');
     wakeTokens = regexp(wakeStr,'^(\d{1,2}):(\d\d)','tokens');
-    fixedWakeTime = str2double(wakeTokens{1}{1})/24 + str2double(wakeTokens{1}{2})/60/24;
+    wakeHour = str2double(wakeTokens{1}{1});
+    wakeMinute = str2double(wakeTokens{1}{2});
+    fixedWakeTime = wakeHour/24 + wakeMinute/60/24;
+    
+    % Create a file name suffix from the fixed sleep time
+    suffix = ['_',num2str(bedHour,'%02.0f'),num2str(bedMinute,'%02.0f'),...
+        '-',num2str(wakeHour,'%02.0f'),num2str(wakeMinute,'%02.0f')];
 else
     fixedBedTime = 0;
     fixedWakeTime = 0;
+    
+    % Create an empty file name suffix
+    suffix = '';
 end
 
 %% File handling
@@ -41,7 +52,7 @@ sleepLog = importSleepLog(sleepLogPath);
 % Set an output location
 saveDir = fullfile(caseWesternHome,'Analysis');
 errorPath = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_error_log.txt']);
+    '_error_log',suffix,'.txt']);
 
 %% Creates a text file that records any errors in the data in the same path
 % as the results
@@ -235,14 +246,14 @@ end
 
 %% Save output
 outputFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_output.mat']);
+    '_output',suffix,'.mat']);
 save(outputFile,'phasorData','sleepData');
 % Convert to Excel
 phasorFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_phasor.xlsx']);
+    '_phasor',suffix,'.xlsx']);
 organizeExcel(phasorData,phasorFile);
 sleepFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_sleep.xlsx']);
+    '_sleep',suffix,'.xlsx']);
 organizeSleepExcel(sleepData,sleepFile);
 
 %% Turn warnings back on
