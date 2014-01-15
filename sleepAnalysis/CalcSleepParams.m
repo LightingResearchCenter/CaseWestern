@@ -1,10 +1,13 @@
 function [SleepStart,SleepEnd,ActualSleep,ActualSleepPercent,...
     ActualWake,ActualWakePercent,SleepEfficiency,Latency,SleepBouts,...
     WakeBouts,MeanSleepBout,MeanWakeBout] = ...
-    CalcSleepParams(Activity,Time,bedTime,wakeTime)
+    CalcSleepParams(Activity,Time,bedTime,wakeTime,threshold)
 %CALCSLEEPPARAMS Calculate sleep parameters using Actiware method
 %   Values and calculations are taken from Avtiware-Sleep
 %   Version 3.4 documentation Appendix: A-1 Actiwatch Algorithm
+
+% Find epoch length in seconds rounded to the nearest second
+Epoch = round((Time(2)-Time(1))*24*60*60);
 
 % Trim Activity and Time to times within the Start and End of the analysis
 % period
@@ -13,10 +16,10 @@ idx = Time >= (bedTime - buffer) & Time <= (wakeTime + buffer);
 Time = Time(idx);
 Activity = Activity(idx);
 
-Epoch = etime(datevec(Time(2)),datevec(Time(1))); % Find epoch length in seconds
+
 
 % Find the sleep state
-sleepState = FindSleepState(Activity,40);
+sleepState = FindSleepState(Activity,threshold);
 
 % Find sleep state in a 10 minute window
 n10 = ceil(600/Epoch); % Number of points in a 10 minute interval

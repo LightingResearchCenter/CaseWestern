@@ -181,7 +181,7 @@ for i1 = 1:numSub
         
         %% Attempt to perform sleep analysis
         try
-            subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
+            subLog = checkSleepLog(sleepLog,subject(i1),aTime,totActi,sleepLogMode,fixedBedTime,fixedWakeTime);
         catch err
             reportError(iteration,err.message,errorPath);
         end
