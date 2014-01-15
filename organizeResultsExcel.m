@@ -5,17 +5,17 @@ function organizeResultsExcel(datasetin,saveFile)
 %% Determine size of input and variable names
 % Make varNames pretty
 uglyVarNames = get(datasetin,'VarNames');
-varNames = lower(regexprep(uglyVarNames,'([^A-Z])([A-Z])','$1 $2'));
 % Set nonrepeating variables
-nonrepNames = {'subject','repeat subject','exclude repeat','season','week'};
+nonrepNames = {'subject','repeatSubject','excludeRepeat','season','week'};
 nonrepCount = numel(nonrepNames) - 1; % not including week
 % Remove variables that do not get repeated from varNames
-varNameIdx = strcmpi(varNames,nonrepNames{1});
+varNameIdx = strcmpi(uglyVarNames,nonrepNames{1});
 for i0 = 2:nonrepCount+1
-    varNameIdx = strcmpi(varNames,nonrepNames{i0}) | varNameIdx;
+    varNameIdx = strcmpi(uglyVarNames,nonrepNames{i0}) | varNameIdx;
 end
-varNames(varNameIdx) = [];
-varCount = numel(varNames);
+uglyVarNames(varNameIdx) = [];
+varCount = numel(uglyVarNames);
+varNames = lower(regexprep(uglyVarNames,'([^A-Z])([A-Z])','$1\r\n$2'));
 
 %% Create header labels
 % Prepare first header row
@@ -27,11 +27,12 @@ week1Head = [{week1Txt},cell(1,varCount-1)];
 
 week2Txt = 'post intervention (2)';
 week2Head = [{week2Txt},cell(1,varCount-1)];
-
-header1 = [cell(1,nonrepCount),week0Head,week1Head,week2Head]; % Combine parts of header1
+% Combine parts of header1
+header1 = [cell(1,nonrepCount),week0Head,week1Head,week2Head];
 
 % Prepare second header row
-header2 = [{'subject'},{'repeat subject'},{'exclude repeat'},{'season'},varNames,varNames,varNames];
+header2 = [{'subject'},{sprintf('repeat\r\nsubject')},...
+    {sprintf('exclude\r\nrepeat')},{'season'},varNames,varNames,varNames];
 
 % Combine headers
 header = [header1;header2];
