@@ -171,8 +171,14 @@ for i1 = 1:numSub
             % Create a CDF version
             WriteActiwatchCDF(CDFactiPath,aTime,PIM);
         end
-        [aTime,PIM] = cropData(aTime,PIM,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
-
+        
+        % Convert PIM to total activity counts
+        epoch = round((aTime(2) - aTime(1))*24*60*100)/100;
+        totActi = pim2totActi(PIM,epoch);
+        
+        % Crop actiwatch data
+        [aTime,totActi] = cropData(aTime,totActi,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
+        
         %% Attempt to perform sleep analysis
         try
             subLog = checkSleepLog(sleepLog,subject(i1),aTime,AI,sleepLogMode,fixedBedTime,fixedWakeTime);
@@ -186,10 +192,10 @@ for i1 = 1:numSub
                 results.SleepEfficiency{i1},results.Latency{i1},...
                 results.SleepBouts{i1},results.WakeBouts{i1},...
                 results.MeanSleepBout{i1},results.MeanWakeBout{i1}] = ...
-                AnalyzeFile(aTime,PIM,subLog.bedtime,subLog.getuptime,true);
+                AnalyzeFile(aTime,totActi,subLog.bedtime,subLog.getuptime,true);
 
             dt = etime(datevec(aTime(2)),datevec(aTime(1)));
-            [results.actiIS{i1},results.actiIV{i1}] = IS_IVcalc(PIM,dt);
+            [results.actiIS{i1},results.actiIV{i1}] = IS_IVcalc(totActi,dt);
 
             if sleepLogMode == 2
                 results.userBedLogs{i1} = sum(subLog.bedlog);
@@ -228,8 +234,8 @@ for i1 = 1:numSub
         end
     
         % Resample and normalize Actiwatch data to Daysimeter data
-        [dTime,CS,AI,aTime,PIM] = ...
-            combineData(aTime,PIM,dTime,CS,AI,...
+        [dTime,CS,AI,aTime,totActi] = ...
+            combineData(aTime,totActi,dTime,CS,AI,...
             startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
 
         % Attempt to perform phasor analysis on the combined data
