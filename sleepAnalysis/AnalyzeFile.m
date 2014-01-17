@@ -1,7 +1,7 @@
 function [ActualSleep,ActualSleepPercent,ActualWake,...
     ActualWakePercent,SleepEfficiency,Latency,SleepBouts,...
     WakeBouts,MeanSleepBout,MeanWakeBout] = ...
-    AnalyzeFile(Time,Activity,BedTime,WakeTime,average)
+    AnalyzeFile(Time,Activity,BedTime,WakeTime,average,k)
 
 Days = length(BedTime);
 
@@ -13,7 +13,7 @@ end
 activeIdx = ~bedIdx;
 meanActive = mean(Activity(activeIdx));
 epoch = round((Time(2)-Time(1))*24*60*60)/60; % Epoch in minutes
-threshold = meanActive*.888/epoch;
+threshold = meanActive*k/epoch;
 
 % Preallocate sleep parameters
 SleepStart = cell(Days,1);
