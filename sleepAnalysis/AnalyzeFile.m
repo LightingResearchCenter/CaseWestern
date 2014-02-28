@@ -1,53 +1,54 @@
-function [ActualSleep,ActualSleepPercent,ActualWake,...
-    ActualWakePercent,SleepEfficiency,Latency,SleepBouts,...
-    WakeBouts,MeanSleepBout,MeanWakeBout] = ...
-    AnalyzeFile(Time,Activity,BedTime,WakeTime,average,k)
+function output = AnalyzeFile(subject,Time,Activity,bedTime,wakeTime)
 
-Days = length(BedTime);
-
-% Calculate threshold from activity
-bedIdx = false(size(Time));
-for i0 = 1:Days
-    bedIdx = (Time >= BedTime(i0) & Time <= WakeTime(i0)) | bedIdx;
-end
-activeIdx = ~bedIdx;
-meanActive = mean(Activity(activeIdx));
-epoch = round((Time(2)-Time(1))*24*60*60)/60; % Epoch in minutes
-threshold = meanActive*k/epoch;
-
-% Preallocate sleep parameters
-SleepStart = cell(Days,1);
-SleepEnd = cell(Days,1);
-ActualSleep = cell(Days,1);
-ActualSleepPercent = cell(Days,1);
-ActualWake = cell(Days,1);
-ActualWakePercent = cell(Days,1);
-SleepEfficiency = cell(Days,1);
-Latency = cell(Days,1);
-SleepBouts = cell(Days,1);
-WakeBouts = cell(Days,1);
-MeanSleepBout = cell(Days,1);
-MeanWakeBout = cell(Days,1);
-% Call function to calculate sleep parameters for each day
-for i = 1:Days
-    [SleepStart{i},SleepEnd{i},ActualSleep{i},...
-        ActualSleepPercent{i},ActualWake{i},ActualWakePercent{i},...
-        SleepEfficiency{i},Latency{i},SleepBouts{i},WakeBouts{i},...
-        MeanSleepBout{i},MeanWakeBout{i}] = ...
-        CalcSleepParams(Activity,Time,BedTime(i),WakeTime(i),threshold);
+%% Vectorize bed times and wake times
+startDays = floor(min(Time)):floor(max(Time));
+bedTimes = startDays + bedTime;
+if bedTime > wakeTime
+    wakeTimes = startDays + 1 + wakeTime;
+else
+    wakeTimes = startDays + wakeTime;
 end
 
-if average
-    ActualSleep = mean(cell2mat(ActualSleep));
-    ActualSleepPercent = mean(cell2mat(ActualSleepPercent));
-    ActualWake = mean(cell2mat(ActualWake));
-    ActualWakePercent = mean(cell2mat(ActualWakePercent));
-    SleepEfficiency = mean(cell2mat(SleepEfficiency));
-    Latency = mean(cell2mat(Latency));
-    SleepBouts = mean(cell2mat(SleepBouts));
-    WakeBouts = mean(cell2mat(WakeBouts));
-    MeanSleepBout = mean(cell2mat(MeanSleepBout));
-    MeanWakeBout = mean(cell2mat(MeanWakeBout));
+if bedTimes(end) > max(Time) || wakeTimes(end) > max(Time)
+    bedTimes(end) = [];
+    wakeTimes(end) = [];
+end
+
+if bedTimes(1) < min(Time) || wakeTimes(1) < min(Time)
+    bedTimes(1) = [];
+    wakeTimes(1) = [];
+end
+
+% Set analysis start and end times
+analysisStartTime = bedTimes - 20/60/24;
+analysisEndTime = wakeTimes + 20/60/24;
+
+%% Preallocate sleep parameters
+nNights = numel(bedTimes);
+
+output = cell(nNights,1);
+
+dateFormat = 'mm/dd/yyyy';
+
+%% Call function to calculate sleep parameters for each day
+for i1 = 1:nNights
+    try
+        output{i1} = sleepAnalysis(Time,Activity,...
+                analysisStartTime(i1),analysisEndTime(i1),...
+                bedTimes(i1),wakeTimes(i1),'auto');
+        tempFields = fieldnames(output{i1})';
+    catch err
+        display(err.message);
+        display(err.stack);
+        tempFields = {};
+    end
+    
+    
+    output{i1}.line = subject + i1/10;
+    output{i1}.subject = subject;
+    output{i1}.date = datestr(floor(analysisStartTime(i1)),dateFormat,'local');
+    
+    output{i1} = orderfields(output{i1},[{'line','subject','date'},tempFields]);
 end
 
 end
