@@ -11,8 +11,8 @@ s2 = warning('off','MATLAB:xlswrite:AddSheet');
 
 %% Enable paths to required subfunctions
 addpath('sleepAnalysis','IO','CDF');
-[parentDirectory, ~, ~] = fullparts(pwd);
-addpath(fullfile(parentDirectory, 'DaysimiterSleepAlgorithm'));
+[parentDirectory, ~, ~] = fileparts(pwd);
+addpath(fullfile(parentDirectory, 'DaysimeterSleepAlgorithm'));
 
 %% Ask user what sleep time to use
 sleepLogMode = menu('Select what sleep time mode to use','fixed','logs/dynamic');
@@ -64,32 +64,6 @@ fclose( fid );
 
 %% Preallocate result variables
 numSub = numel(subject);
-results = dataset;
-results.subject = subject;
-results.repeatSubject = cell(numSub,1);
-results.excludeRepeat = cell(numSub,1);
-results.week = week;
-results.season = cell(numSub,1);
-
-% Preallocate sleep results
-results.ActualSleep = cell(numSub,1);
-results.ActualSleepPercent = cell(numSub,1);
-results.ActualWake = cell(numSub,1);
-results.ActualWakePercent = cell(numSub,1);
-results.SleepEfficiency = cell(numSub,1);
-results.Latency = cell(numSub,1);
-results.SleepBouts = cell(numSub,1);
-results.WakeBouts = cell(numSub,1);
-results.MeanSleepBout = cell(numSub,1);
-results.MeanWakeBout = cell(numSub,1);
-results.actiIS = cell(numSub,1);
-results.actiIV = cell(numSub,1);
-if sleepLogMode == 2
-    results.userBedLogs = cell(numSub,1);
-    results.calcBedLogs = cell(numSub,1);
-    results.userUpLogs = cell(numSub,1);
-    results.calcUpLogs = cell(numSub,1);
-end
 
 %% Specify repeat subjects and which ones to be excluded
 repeats1  = [13,22,30,38,42,44,47,48,60,64]; % Subject on first run
@@ -113,6 +87,8 @@ monthStr = datestr(startTime,'mm');
 monthCell =  mat2cell(monthStr,ones(length(monthStr),1));
 month = str2double(monthCell);
 
+output = cell(numSub, 1);
+
 %% Begin main loop
 reverseStr = '';
 for i1 = 1:numSub
@@ -121,25 +97,6 @@ for i1 = 1:numSub
         subject(i1),week(i1),i1,numSub);
     disp([reverseStr,iteration]);
     reverseStr = repmat(sprintf('\b'), 1, numel(iteration)+1);
-    
-    % Assign a text value for season
-    if month(i1) < 3 || month(i1) >= 11
-        results.season{i1} = 'winter';
-    else
-        results.season{i1} = 'summer';
-    end
-    
-    % Check if the subject is a repeat
-    if any(subject(i1) == repeats1)
-        results.repeatSubject{i1} = repeats2(subject(i1) == repeats1);
-    elseif any(subject(i1) == repeats2)
-        results.repeatSubject{i1} = repeats1(subject(i1) == repeats2);
-    end
-    if any(subject(i1) == repeatsEx)
-        results.excludeRepeat{i1} = 'true';
-    else
-        results.excludeRepeat{i1} = 'false';
-    end
     
     %% Check if Actiwatch file path is listed and exists
     if isempty(actiPath{i1,1}) || (exist(actiPath{i1,1},'file') ~= 2)
@@ -178,43 +135,27 @@ for i1 = 1:numSub
         catch err
             reportError(iteration,err.message,errorPath);
         end
-
+        
         try
-            [results.ActualSleep{i1},results.ActualSleepPercent{i1},...
-                results.ActualWake{i1},results.ActualWakePercent{i1},...
-                results.SleepEfficiency{i1},results.Latency{i1},...
-                results.SleepBouts{i1},results.WakeBouts{i1},...
-                results.MeanSleepBout{i1},results.MeanWakeBout{i1}] = ...
-                AnalyzeFile(aTime,totActi,subLog.bedtime,subLog.getuptime,true);
-
-            dt = etime(datevec(aTime(2)),datevec(aTime(1)));
-            [results.actiIS{i1},results.actiIV{i1}] = IS_IVcalc(totActi,dt);
-
-            if sleepLogMode == 2
-                results.userBedLogs{i1} = sum(subLog.bedlog);
-                results.calcBedLogs{i1} = numel(subLog.bedlog) - results.userBedLogs{i1};
-                results.userUpLogs{i1} = sum(subLog.getuplog);
-                results.calcUpLogs{i1} = numel(subLog.getuplog) - results.userUpLogs{i1};
-            end
+                 output{i1} = AnalyzeFile(subject(i1), aTime, totActi, subLog.bedtime,...
+                    subLog.getuptime);
         catch err
             reportError(iteration,err.message,errorPath);
-        end
+        end 
     end    
 end
 
 %% Update displayed message
-msg = 'Analysis complete. Saving results to files.';
+msg = 'Analysis complete. Saving output to files.';
 disp([reverseStr,msg]);
 reverseStr = repmat(sprintf('\b'), 1, numel(msg)+1);
 
 %% Save output
 outputFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
     '_output',suffix,'.mat']);
-save(outputFile,'results');
+save(outputFile,'output');
 % Convert to Excel
-excelFile = fullfile(saveDir,[datestr(runTime,'yyyy-mm-dd_HH-MM'),...
-    '_results',suffix,'.xlsx']);
-organizeResultsExcel(results,excelFile);
+organizeExcel(outputFile);
 
 %% Turn warnings back on
 warning(s2);
