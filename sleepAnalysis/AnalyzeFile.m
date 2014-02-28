@@ -2,6 +2,7 @@ function output = AnalyzeFile(subject,Time,Activity,bedTime,wakeTime)
 
 %% Vectorize bed times and wake times
 startDays = floor(min(Time)):floor(max(Time));
+
 bedTimes = startDays + bedTime;
 if bedTime > wakeTime
     wakeTimes = startDays + 1 + wakeTime;
@@ -38,7 +39,7 @@ for i1 = 1:nNights
                 bedTimes(i1),wakeTimes(i1),'auto');
         tempFields = fieldnames(output{i1})';
     catch err
-        display(err.message);
+        display(err.getReport)
         display(err.stack);
         tempFields = {};
     end

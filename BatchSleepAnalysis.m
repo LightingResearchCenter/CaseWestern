@@ -12,7 +12,7 @@ s2 = warning('off','MATLAB:xlswrite:AddSheet');
 %% Enable paths to required subfunctions
 addpath('sleepAnalysis','IO','CDF');
 [parentDirectory, ~, ~] = fileparts(pwd);
-addpath(fullfile(parentDirectory, 'DaysimeterSleepAlgorithm'));
+addpath(fullfile(parentDirectory, 'DaysimeterSleepAlgorithm'), '-end');
 
 %% Ask user what sleep time to use
 sleepLogMode = menu('Select what sleep time mode to use','fixed','logs/dynamic');
@@ -128,20 +128,23 @@ for i1 = 1:numSub
         
         % Crop actiwatch data
         [aTime,totActi] = cropData(aTime,totActi,startTime(i1),stopTime(i1),rmStart(i1),rmStop(i1));
-        
+
         %% Attempt to perform sleep analysis
-        try
-            subLog = checkSleepLog(sleepLog,subject(i1),aTime,totActi,sleepLogMode,fixedBedTime,fixedWakeTime);
-        catch err
-            reportError(iteration,err.message,errorPath);
-        end
-        
-        try
-                 output{i1} = AnalyzeFile(subject(i1), aTime, totActi, subLog.bedtime,...
-                    subLog.getuptime);
-        catch err
-            reportError(iteration,err.message,errorPath);
-        end 
+        subLog = checkSleepLog(sleepLog,subject(i1),aTime,totActi,sleepLogMode,fixedBedTime,fixedWakeTime);
+        output{i1} = AnalyzeFile(subject(i1), aTime, totActi, subLog.bedtime(i1),...
+                      subLog.getuptime(i1));
+%         try
+%             subLog = checkSleepLog(sleepLog,subject(i1),aTime,totActi,sleepLogMode,fixedBedTime,fixedWakeTime);
+%         catch err
+%             reportError(iteration,err.message,errorPath);
+%         end
+%         
+%         try
+%                  output{i1} = AnalyzeFile(subject(i1), aTime, totActi, subLog.bedtime,...
+%                     subLog.getuptime);
+%         catch err
+%             reportError(iteration,err.message,errorPath);
+%         end 
     end    
 end
 
