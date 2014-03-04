@@ -3,6 +3,10 @@ function output = AnalyzeFile(subject,Time,Activity,bedTime,wakeTime)
 %% Vectorize bed times and wake times
 startDays = floor(min(Time)):floor(max(Time));
 
+% Removes days from the bed time (only leaves time not date)
+bedTimeDay = floor(bedTime);
+bedTime = bedTime - bedTimeDay;
+
 bedTimes = startDays + bedTime;
 if bedTime > wakeTime
     wakeTimes = startDays + 1 + wakeTime;
