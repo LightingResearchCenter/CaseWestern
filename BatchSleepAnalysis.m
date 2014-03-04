@@ -33,8 +33,8 @@ if sleepLogMode == 1
     suffix = ['_',num2str(bedHour,'%02.0f'),num2str(bedMinute,'%02.0f'),...
         '-',num2str(wakeHour,'%02.0f'),num2str(wakeMinute,'%02.0f')];
 else
-    fixedBedTime = 0;
-    fixedWakeTime = 0;
+    fixedBedTime = 22/24;
+    fixedWakeTime = 8/24;
     
     % Create an empty file name suffix
     suffix = '';
