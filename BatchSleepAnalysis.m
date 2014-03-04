@@ -91,7 +91,7 @@ output = cell(numSub, 1);
 
 %% Begin main loop
 reverseStr = '';
-for i1 = 1:numSub
+for i1 = 6:numSub
     % Creates an iteration title with information about the loop
     iteration = sprintf('Subject: %4.1f  Week: %i  Iteration: %3i of %3i',...
         subject(i1),week(i1),i1,numSub);
@@ -131,6 +131,12 @@ for i1 = 1:numSub
 
         %% Attempt to perform sleep analysis
         subLog = checkSleepLog(sleepLog,subject(i1),aTime,totActi,sleepLogMode,fixedBedTime,fixedWakeTime);
+        
+        % If the iteration number is greater than the number of get up/
+        % sleep times, skip analysis
+        if i1 > size(subLog, 1)
+            continue;
+        end
         output{i1} = AnalyzeFile(subject(i1), aTime, totActi, subLog.bedtime(i1),...
                       subLog.getuptime(i1));
 %         try
