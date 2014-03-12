@@ -173,7 +173,7 @@ for i1 = 1:numSub
         end
         
         % Convert PIM to total activity counts
-        epoch = round((aTime(2) - aTime(1))*24*60*100)/100;
+        epoch = round(mode(diff(aTime))*24*60*100)/100;
         totActi = pim2totActi(PIM,epoch);
         
         % Crop actiwatch data
