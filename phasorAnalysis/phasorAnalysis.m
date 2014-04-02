@@ -1,21 +1,36 @@
-function [phasorMagnitude, phasorAngle, IS, IV, mCS, MagH, f24abs] = phasorAnalysis(time, CS, activity)
+function param = phasorAnalysis(time,CS,activity,subject,season,repeatSubject,excludeRepeat,week)
 %PHASORANALYSIS Performs analysis on CS and activity
 
+param = struct('subject',         subject,...
+               'week',            week,...
+               'repeatSubject',   repeatSubject,...
+               'excludeRepeat',   excludeRepeat,...
+               'season',          season,...
+               'phasorMagnitude', {[]},...
+               'phasorAngle',     {[]},...
+               'IS',              {[]},...
+               'IV',              {[]},...
+               'mCS',             {[]},...
+               'MagH',            {[]},...
+               'f24abs',          {[]});
+
 %% Process and analyze data
-Srate = 1/(round(((time(2)-time(1))*(24*3600))*1000)/1000); % sample rate in Hertz
+epoch = mode(round(diff(time)*24*60*60)); % epoch to nearest second
+Srate = 1/epoch; % sample rate in Hertz
 % Calculate inter daily stability and variablity
-[IS,IV] = IS_IVcalc(activity,1/Srate);
+[param.IS,param.IV] = IS_IVcalc(activity,1/Srate);
 
 % Apply gaussian filter to data
-CS = gaussian(CS, 4);
-activity = gaussian(activity, 4);
+window = ceil(300/epoch); % minimum number of samples to cover 5 minutes
+CS = gaussian(CS, window);
+activity = gaussian(activity, window);
 
 % Calculate phasors
-[phasorMagnitude, phasorAngle] = cos24(CS, activity, time);
+[param.phasorMagnitude, param.phasorAngle] = cos24(CS, activity, time);
 [f24H,f24] = phasor24Harmonics(CS,activity,Srate); % f24H returns all the harmonics of the 24-hour rhythm (as complex numbers)
-MagH = sqrt(sum((abs(f24H).^2))); % the magnitude including all the harmonics
+param.MagH = sqrt(sum((abs(f24H).^2))); % the magnitude including all the harmonics
 
-mCS = mean(CS);
-f24abs = abs(f24);
+param.mCS = mean(CS(CS>0));
+param.f24abs = abs(f24);
 
 end
